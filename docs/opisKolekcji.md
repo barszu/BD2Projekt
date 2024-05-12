@@ -66,11 +66,11 @@ Baza ma implementować prosty sklep internetowy, w tym celu stworzyliśmy poniż
 	productId: 10,
 	year: 2024,
 	month: 5,
-	sales: {
+	sales: [{
 		customer_id: 0,
 		quantity: 1,
 		unitPrice: 900
-	}
+	}]
 }
 ```
 ## Operacje CRUD na bazie danych które bedą implementowane:
