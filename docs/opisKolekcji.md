@@ -7,39 +7,40 @@ Baza ma implementować prosty sklep internetowy, w tym celu stworzyliśmy poniż
 
 ```js
 {
-_id: 0,
-customerData: {
-	firstName: "Jan",
-	lastName: "Kowalski",
-	email: "janekjanek@gmail.com",
-	phone: "123456789",
-	adress:{
-		country: "Poland",
-		postalCode: "12-345",
-		region: "Śląsk",
-		city: "Katowice",
-		street: "Mariacka",
-		buildingNumber: "9",
-		apartmentNumber: null
+	_id: 0,
+	customerData: {
+		firstName: "Jan",
+		lastName: "Kowalski",
+		email: "janekjanek@gmail.com",
+		phone: "123456789",
+		adress:{
+			country: "Poland",
+			postalCode: "12-345",
+			region: "Śląsk",
+			city: "Katowice",
+			street: "Mariacka",
+			buildingNumber: "9",
+			apartmentNumber: null
+		}
+	},
+	login: "janekjanek",
+	password: encodedPassword,
+	orders: {
+		_id:0,
+		date: new Date("2024-05-12"),
+		paymentStatus: "confirmed",
+		products: [
+			{
+				productId: 1,
+				quantity: 5
+			},
+			{
+				productId: 10,
+				quantity: 1
+			},
+		],
+		totalPrice: 100
 	}
-},
-login: "janekjanek",
-password: encodedPassword,
-orders: {
-	_id:0,
-	date: new Date("2024-05-12"),
-	paymentStatus: "confirmed",
-	products: [
-		{
-			productId: 1,
-			quantity: 5
-		},
-		{
-			productId: 10,
-			quantity: 1
-		},
-	],
-	totalPrice: 100
 }
 ```
 
