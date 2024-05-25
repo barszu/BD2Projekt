@@ -1,3 +1,5 @@
+import {User} from "./model/userSchema.js";
+
 const port = 4000
 const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net/shopTest'
 
@@ -107,6 +109,95 @@ app.get('/allproducts', async (req, res) => {
     const products = await Product.find({})
     console.log('All products', products)
     res.json(products)
+})
+
+// endpoint for registering of new users
+app.post('/signup', async (req, res) => {
+    const userData = {
+        email: req.body.email,
+        password: req.body.password,
+        name: req.body.name
+    }
+    const isUserExist = await User.findOne({ email: userData.email })
+    if (isUserExist) {
+        return res.status(400).json({
+            success: false,
+            message: 'User with that email already exists',
+            errors: 'User already exists'
+        })
+    }
+    // TODO
+    let cart = {};
+    for (let i = 0; i < 300; i++) {cart[i] = 0;}
+
+    const user = new User({
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        cartData: cart
+    })
+
+    await user.save() //add user to db
+
+    const data = { //data for jwt (json web token)
+        user: {id: user.id}
+    }
+
+    const token = jwt.sign(data, 'secret_ecom');
+    res.json({
+        success: true,
+        token: token,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email
+        }
+    })
+
+
+})
+
+// endpoint for logging in
+app.post('/login', async (req, res) => {
+    const userDataReq = {
+        email: req.body.email,
+        password: req.body.password
+    }
+    const dbUser = await User.findOne({email: userDataReq.email})
+    if (!dbUser){
+        return res.status(400).json({
+            success: false,
+            message: 'User with that email does not exist',
+            errors: 'User does not exist'
+        })
+    }
+
+    const passCompare = dbUser.password === userDataReq.password
+
+    if (passCompare){
+        const data = {
+            user: {id: dbUser.id}
+        }
+        const token = jwt.sign(data, 'secret_ecom')
+        res.json({
+            success: true,
+            token: token,
+            user: {
+                id: dbUser.id,
+                name: dbUser.name,
+                email: dbUser.email
+            }
+
+        })
+    }
+    else {
+        res.status(400).json({
+            success: false,
+            message: 'Invalid password',
+            errors: 'Invalid password'
+        })
+    }
+
 })
 
 

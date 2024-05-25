@@ -1,0 +1,10 @@
+.products {
+    margin-top: 5vh;
+    padding: 10vh 5vh 5vh;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); /* Responsywna siatka */
+    gap: 30px;
+    text-decoration: none;
+}
+
+
