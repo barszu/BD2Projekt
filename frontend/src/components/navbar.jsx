@@ -1,7 +1,7 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import {ShoppingCart} from "phosphor-react"
-import {ShopContext} from "../context/shopContext.jsx";
+import {CartContext} from "../context/cartContext.jsx";
 import "./navbar.css";
 import { useAuth } from '../context/authContext.jsx';
 //phosphor-react to biblioteka ikonek
@@ -10,7 +10,7 @@ const Navbar = () => {
 
     const { isLoggedIn, login, logout } = useAuth();
 
-    const {getTotalCartItems} = React.useContext(ShopContext);
+    const {getTotalCartItems} = React.useContext(CartContext);
     return (
         <div className="navbar">
             <Link to="/"><div className="navbar-brand">eBazarek Andrzej</div></Link>

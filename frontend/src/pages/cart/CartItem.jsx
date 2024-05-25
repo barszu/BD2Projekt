@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {ShopContext} from "../../context/shopContext.jsx";
+import {CartContext} from "../../context/cartContext.jsx";
 
 const CartItem = (props) => {
 
     const {id , productName , price , productImage } = props.data;
-    const {addToCart , removeFromCart , removeCompletelyFromCart , cartItems , setCartItemCount} = React.useContext(ShopContext);
+    const {addToCart , removeFromCart , removeCompletelyFromCart , cartItems , setCartItemCount} = React.useContext(CartContext);
 
     const [inputValue, setInputValue] = useState(cartItems[id].toString());
 

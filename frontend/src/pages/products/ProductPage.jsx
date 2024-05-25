@@ -1,16 +1,18 @@
 import React, {useContext} from 'react';
 import {PRODUCTS} from "../../dummy/dummyProducts.js";
-import { ShopContext } from "../../context/shopContext.jsx";
+import { CartContext } from "../../context/cartContext.jsx";
 import './product-page.css';
 import {useParams} from "react-router-dom";
 import { useAuth } from '../../context/authContext.jsx';
+
 const ProductPage = () => {
 
     const { id } = useParams();
     const product = PRODUCTS[id];
-    const { addToCart , cartItems , removeFromCart , removeCompletelyFromCart  } = useContext(ShopContext)
+    const { addToCart , cartItems , removeFromCart , removeCompletelyFromCart  } = useContext(CartContext)
     const { isLoggedIn, login, logout } = useAuth();
 
+    console.log(products);
     return (
         <div className="p-box">
             <div className="p-info">

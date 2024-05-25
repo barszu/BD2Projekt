@@ -5,29 +5,33 @@ import Shop from "./pages/shop/shop.jsx";
 import Cart from "./pages/cart/cart.jsx";
 import Login from './pages/login/login.jsx';
 import ProductPage from './pages/products/ProductPage.jsx';
-import {ShopContextProvider} from "./context/shopContext.jsx";
+import {ShopContextProvider} from "./context/cartContext.jsx";
 import { AuthProvider } from './context/authContext.jsx';
+import { ProductsProvider} from "./context/productsContext.jsx";
 
 function App() {
     return (
         <div className="App">
-            <ShopContextProvider>
+            <ProductsProvider>
                 <AuthProvider>
-                    <BrowserRouter>
-                        <Navbar />
-                        {/*navbars bedzie widoczne w kazdej stronie*/}
-                        <Routes>
-                            <Route path="/" element={<Shop/>} />
-                            <Route path="/cart" element={<Cart/>} />
-                            <Route path="/login" element={<Login/>} />
-                            <Route path="/products/:id" element={<ProductPage />} />
+                    <ShopContextProvider>
+                        <BrowserRouter>
+                            <Navbar />
+                            {/*navbars bedzie widoczne w kazdej stronie*/}
+                            <Routes>
+                                <Route path="/" element={<Shop/>} />
+                                <Route path="/cart" element={<Cart/>} />
+                                <Route path="/login" element={<Login/>} />
+                                <Route path="/products/:id" element={<ProductPage />} />
 
 
-                            <Route path="*" element={<h1>Not Found</h1>} />
-                        </Routes>
-                    </BrowserRouter>
+                                <Route path="*" element={<h1>Not Found</h1>} />
+                            </Routes>
+                        </BrowserRouter>
+                    </ShopContextProvider>
                 </AuthProvider>
-            </ShopContextProvider>
+            </ProductsProvider>
+
 
         </div>
 

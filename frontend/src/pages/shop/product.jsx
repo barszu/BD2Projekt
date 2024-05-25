@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import { ShopContext } from "../../context/shopContext.jsx";
+import { CartContext } from "../../context/cartContext.jsx";
 import {Link} from "react-router-dom";
 import "./product.css";
 import { useAuth } from '../../context/authContext.jsx';
@@ -7,7 +7,7 @@ import { useAuth } from '../../context/authContext.jsx';
 const Product = (props) => {
     const { isLoggedIn, login, logout } = useAuth();
     const {id , productName , price , productImage } = props.data;
-    const { addToCart , cartItems } = useContext(ShopContext)
+    const { addToCart , cartItems } = useContext(CartContext)
     return (
         <div className="product">
             <Link key={id} to={`/products/${id}`}>

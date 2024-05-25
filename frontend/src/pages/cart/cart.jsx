@@ -2,13 +2,13 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 
 import {PRODUCTS} from "../../dummy/dummyProducts.js";
-import {ShopContext} from "../../context/shopContext.jsx";
+import {CartContext} from "../../context/cartContext.jsx";
 import CartItem from "./CartItem.jsx";
 import "./cart.css"
 
 const Cart = () => {
 
-    const {clearCart , cartItems , getTotalCartAmount} = useContext(ShopContext);
+    const {clearCart , cartItems , getTotalCartAmount} = useContext(CartContext);
     const navigate = useNavigate();
 
     const totalCartAmount = getTotalCartAmount();

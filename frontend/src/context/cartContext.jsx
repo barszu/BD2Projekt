@@ -1,8 +1,9 @@
 import React, {useState} from "react";
 import {PRODUCTS} from "../dummy/dummyProducts.js";
+import {useAuth} from "./authContext.jsx";
 
 //global states -> global varaiables
-export const ShopContext = React.createContext(null);
+export const CartContext = React.createContext(null);
 
 const getDefaultCart = () => {
     let cart = {};
@@ -12,9 +13,36 @@ const getDefaultCart = () => {
     return cart
 }
 export const ShopContextProvider = (props) => {
+    //TODO: add clound synschronization -> update cartItems in DB for user
+    const {isLoggedIn} = useAuth();
 
     // cartItems = obj{ itemId:noOfItem }
     const [ cartItems , setCartItems ] = useState(getDefaultCart());
+
+    const syncCart = () => { //TODO: chyba za duzy masochizm
+        if (!isLoggedIn){
+            alert("You need to be logged in to sync cart!")
+        }
+        const token = localStorage.getItem('auth-token');
+        fetch('http://localhost:4000/updatecart', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/form-data',
+                'Content-Type': 'application/json',
+                'auth-token': `${token}`
+            },
+            body: JSON.stringify({
+                cartItems
+            }),
+        }).then(response => {
+            return response.json();
+        }).then(data => {
+            console.log(data);
+        }).catch(err => {
+            console.log("Something went wrong with server... Is it running???" , err);
+        })
+
+    }
 
     const getTotalCartAmount = () => {
         let total = 0;
@@ -75,9 +103,10 @@ export const ShopContextProvider = (props) => {
         removeCompletelyFromCart ,
         setCartItemCount ,
         getTotalCartAmount ,
-        getTotalCartItems
+        getTotalCartItems,
+        syncCart
     }
 
-    return <ShopContext.Provider value={contextValue}>{props.children}</ShopContext.Provider>//provider -> track of all data, organize logic
+    return <CartContext.Provider value={contextValue}>{props.children}</CartContext.Provider>//provider -> track of all data, organize logic
 }
 

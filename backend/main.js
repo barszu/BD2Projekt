@@ -200,6 +200,62 @@ app.post('/login', async (req, res) => {
 
 })
 
+// middleware for finding user by token
+const findUser = async (req, res, next) => { //TODO not tested!
+    const token = req.header('auth-token')
+    if (!token) {
+        return res.status(401).json({
+            success: false,
+            errors: 'No token found, authorization denied',
+            message: 'Authenticate using a valid token'
+        })
+    }
+    try {
+        const decoded = jwt.verify(token, 'secret_ecom')
+        req.user = decoded.user
+        next()
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            errors: "Token is not valid",
+            message: 'Provided token is not valid'
+        })
+    }
+}
+
+// endpoint for updateing whole cart TODO change that, not tested
+app.post('/updatecart', findUser, async (req, res) => {
+    try {
+        const userData = await User.findOne({_id: req.user.id})
+        if (!userData) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found in DB'
+            });
+        }
+
+        if (!req.body.cartItems) {
+            return res.status(400).json({
+                success: false,
+                message: 'Bad request, cartItems missing'
+            });
+        }
+
+        userData.cartData = req.body.cartItems
+        await User.findOneAndUpdate({_id: userData._id}, {cartData: userData.cartData})
+        res.json({
+            success: true,
+            message: 'Cart updated'
+        })
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error probably DB error'
+        });
+    }
+
+});
+
 
 
 app.listen(port, (err) => {

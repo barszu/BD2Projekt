@@ -6,74 +6,135 @@ import { useAuth } from '../../context/authContext.jsx';
 
 
 function Login() {
-    const [hasAccount, setHasAccount] = useState(true);
+    const { isLoggedIn, login, logout } = useAuth();
+    const [hasAccountState, setHasAccountState] = useState(true);
 
     const toggleForm = () => {
-        setHasAccount(!hasAccount);
+        setHasAccountState(!hasAccountState);
     };
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formDataUnion, setFormDataUnion] = useState({
+        email: '',
+        password: '',
+        username: ''
+    });
+
+    const formChangeHandler = (e) => {
+        setFormDataUnion({...formDataUnion, [e.target.name]: e.target.value});
+    }
 
     const navigate = useNavigate();
 
-    const { isLoggedIn, login, logout } = useAuth();
 
-    const logInUser = () => {
-        if(email.length === 0){
-          alert("Email has left Blank!");
+
+    const logInUser = async (event) => {
+        event.preventDefault();
+        const form = event.target.closest('form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
         }
-        else if(password.length === 0){
-          alert("password has left Blank!");
+
+        let responseData
+        await fetch('http://localhost:4000/login', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/form-data',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: formDataUnion.email,
+                password: formDataUnion.password,
+                // name: formDataUnion.username
+            }),
+
+        }).then(response => {
+            return response.json();
+        }).then(data => {
+            responseData = data;
+            console.log(data);
+        }).catch(err => {
+            console.log("Something went wrong with server... Is it running???" , err);
+        })
+
+        if (responseData.success) {
+            // localStorage.setItem('auth-token', responseData.token);
+            login();
+            // alert("User registered successfully");
+            navigate("/");
         }
-        else{
-            axios.post('http://localhost:4000/login', {
-                email: email,
-                password: password
-            })
-            .then(function (response) {
-                console.log(response);
-                //console.log(response.data);
-                login();
-                navigate("/");
-            })
-            .catch(function (error) {
-                console.log(error, 'error');
-                if (error.response.status === 401) {
-                    alert("Invalid credentials");
-                }
-            });
+        else {
+            alert("Invalid credentials" + responseData.message);
         }
     }
 
-    const registerUser = () => {
-        axios.post('http://localhost:4000/signup', {
-            email: email,
-            name: "TODO: name",
-            password: password
+    const registerUser = async (event) => {
+        event.preventDefault();
+        const form = event.target.closest('form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        let responseData
+        await fetch('http://localhost:4000/signup', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/form-data',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: formDataUnion.email,
+                password: formDataUnion.password,
+                name: formDataUnion.username
+            }),
+
+        }).then(response => {
+            return response.json();
+        }).then(data => {
+            responseData = data;
+            console.log(data);
+        }).catch(err => {
+            console.log("Something went wrong with server... Is it running???" , err);
         })
-        .then(function (response) {
-            console.log(response);
-            login();
+
+        if (responseData.success) {
+            login(responseData.token);
+            // alert("User registered successfully");
             navigate("/");
-        })
-        .catch(function (error) {
-            console.log(error, 'error');
-            if (error.response.status === 401) {
-                alert("Invalid credentials");
-            }
-        });
+        }
+        else {
+            alert("Invalid credentials" + responseData.message);
+        }
     };
 
 
     return (
         <div className="login-container">
-            {hasAccount ? (
+            {hasAccountState ? (
                 <form className="login-form">
                     <h2>Zaloguj się</h2>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Hasło" required />
-                    <button type="button" onClick={logInUser}>Zaloguj się</button>
+                    <input
+                        name={"email"}
+                        value={formDataUnion.email}
+                        type="email"
+                        onChange={formChangeHandler}
+                        placeholder="Email"
+                        required
+                    />
+                    <input
+                        name={"password"}
+                        value={formDataUnion.password}
+                        type="password"
+                        onChange={formChangeHandler}
+                        placeholder="Password"
+                        required
+                    />
+                    <button
+                        type={"submit"}
+                        onClick={(event)=> logInUser(event)}
+                    >Zaloguj się
+                    </button>
                     <p>
                         Nie masz konta? <span className="change" onClick={toggleForm}>Zarejestruj się</span>
                     </p>
@@ -81,11 +142,35 @@ function Login() {
             ) : (
                 <form className="registration-form">
                     <h2>Zarejestruj się</h2>
-                    {/* <input type="text" placeholder="Name" required />
-                    <input type="text" placeholder="Surname" required /> */}
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Hasło" required />
-                    <button type="button" onClick={registerUser}>Zarejestruj się</button>
+                    <input
+                        name={"username"}
+                        value={formDataUnion.username}
+                        type="text"
+                        onChange={formChangeHandler}
+                        placeholder="Username TODO"
+                        required
+                    />
+                    <input
+                        name={"email"}
+                        value={formDataUnion.email}
+                        type="email"
+                        onChange={formChangeHandler}
+                        placeholder="Email"
+                        required
+                    />
+                    <input
+                        name={"password"}
+                        value={formDataUnion.password}
+                        type="password"
+                        onChange={formChangeHandler}
+                        placeholder="Password"
+                        required
+                    />
+                    <button
+                        type={"submit"}
+                        onClick={(event)=> registerUser(event)}
+                    >Zarejestruj się
+                    </button>
                     <p>
                         Masz już konto? <span className="change" onClick={toggleForm}>Zaloguj się</span>
                     </p>
