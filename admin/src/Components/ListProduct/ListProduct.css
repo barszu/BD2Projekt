@@ -1,6 +1,45 @@
 .list-product {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 70%;
+    height: 740px;
+    padding: 10px 50px 10px 50px;
+    margin: 30px;
+    border-radius: 6px;
+    background: white;
+    left: 10%;
+    margin-left: 5%;
+}
+
+.list-product-allproducts {
+    /*width: 60%;*/
+    /*left: 40%;*/
+    overflow-y: auto;
+}
+
+.list-product-format-main {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    width: 100%;
+    padding: 20px 0 20px 0;
+    color: black;
+    font-size: 15px;
+    font-weight: 600;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: #2c3e50;
+}
+
+.list-product-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    margin: 10px;
+}
+
+.list-product-format {
+    align-items: center;
+    font-weight: 500;
 }
