@@ -1,24 +1,18 @@
-import {User} from "./model/userSchema.js";
+import {User} from "./models/userSchema.js";
 
 const port = 4000
-const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net/shopTest'
+const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net/shopTest2'
 
-// const express = require('express')
 import express from 'express'
-// const mongoose = require('mongoose')
 import mongoose from 'mongoose'
-// const jwt = require('jsonwebtoken')
 import jwt from 'jsonwebtoken'
-// const multer = require('multer')
 import multer from 'multer'
-// const path = require('path')
 import path from 'path'
-// const cors = require('cors')
 import cors from 'cors'
 
 
 
-import { Product } from './model/productSchema.js'
+import { Product } from './models/productSchema.js'
 
 
 
@@ -34,8 +28,17 @@ mongoose.connect(dbUrl)
 
 //api
 
-app.get('/', (req, res) => {
-    res.send('Hello from server')
+app.get('/', async (req, res) => {
+    // res.send('Hello from server')
+    const newUser = new User({
+        login: 'Kuba',
+        email: 'kuba@g.com',
+        password: '123'
+    })
+    const savedUser = await newUser.save();
+    console.log(savedUser)
+    const fetchedUsers = await User.find({});
+    res.json(fetchedUsers)
 })
 
 // Image Storage
