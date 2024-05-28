@@ -31,8 +31,8 @@ mongoose.connect(dbUrl)
 app.get('/', async (req, res) => {
     // res.send('Hello from server')
     const newUser = new User({
-        login: 'Kuba',
-        email: 'kuba@g.com',
+        login: 'Kuba11',
+        email: 'kuba11@g.com',
         password: '123'
     })
     const savedUser = await newUser.save();

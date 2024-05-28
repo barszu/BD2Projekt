@@ -1,5 +1,4 @@
 import mongoose , {Schema} from "mongoose";
-import {Email, Login, Phone, PaymentStatus } from "../Types/types.js";
 import {ObjectId} from "../Types/shorts.js";
 
 const regularStringLength = 50
@@ -45,9 +44,7 @@ const CustomerDataSchema = new Schema({
         type: String,
         maxlength: [regularStringLength, `lastName ${regularMessageStringLength}`]
     },
-    phone: {
-        type: Phone
-    },
+    phone: { type: String, validate: /^\+(?:[0-9] ?){6,14}[0-9]$/ },
     address: {
         type: AddressSchema
     }
@@ -58,7 +55,9 @@ const OrderSchema = new Schema({
         type: Date
     },
     paymentStatus: {
-        type: PaymentStatus
+        type: String,
+        required: true,
+        enum: ['Paid', 'Pending', 'Failed']
     },
     products: [
         {
@@ -72,8 +71,8 @@ const OrderSchema = new Schema({
 // main schema
 const UserSchema = new Schema({
     customerData: { type: CustomerDataSchema },
-    login: { type: Login, unique: true, required: true },
-    email: { type: Email, unique: true, required: true },
+    login: { type: String, required: true, unique: true , validate: /^[a-zA-Z0-9]{5,}$/ },
+    email: { type: String, required: true, unique: true , validate: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ },
     password: { type: String, required: true },
     cartData: { type: Object, default: {} }, //domyślnie pusty obiekt
     orders: { type: [OrderSchema], default: [] } // domyślnie pusta lista
