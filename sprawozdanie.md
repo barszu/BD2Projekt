@@ -1,17 +1,23 @@
-# Mini projekt - sklep internetowy
+# BD2 mini projekt - sklep internetowy
 
-## Zespół
+Skład grupy (imiona i nazwiska, adresy email):
+- Bartłomiej Szubiak bszubiak@student.agh.edu.pl
+- Szymon Kubiczek kubiczek@student.agh.edu.pl
+- Konrad Armatys karmatys@student.agh.edu.pl
 
-- Bartłomiej Szubiak
-- Szymon Kubiczek
-- Konrad Armatys
+Temat (tytuł) projektu: Sklep internetowy
 
-## Tech stack
+Informacje o wykorzystywanym SZBD i technologii realizacji projektu
+- baza danych: `MongoDB`
+- backend: `Node.js` , `Express.js`
+- frameworki\middleware dla backend'u: `mongoose` , `multer` , `cors`
+- frontend: `React`
 
-- MongoDB
-- Express JS
+Link do repozytorium (github):
+https://github.com/Simsoftcik/BD2Projekt.git
 
-## Własne typy danych
+
+## Własne typy danych (pasujące do wyrażeń regularnych)
 
 ### string: email
 
