@@ -70,7 +70,7 @@ const OrderSchema = new Schema({
 
 // main schema
 const UserSchema = new Schema({
-    customerData: { type: CustomerDataSchema },
+    customerData: { type: CustomerDataSchema }, //TODO zrób to jako required
     login: { type: String, required: true, unique: true , validate: /^[a-zA-Z0-9]{5,}$/ },
     email: { type: String, required: true, unique: true , validate: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ },
     password: { type: String, required: true },

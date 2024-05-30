@@ -4,7 +4,12 @@ const regularStringLength = 100
 const regularMessageStringLength = `Cannot be longer than ${regularStringLength} characters`
 
 const Product = mongoose.model('Product', {
-    name: {type: String, required: true},
+    name: {
+        type: String,
+        required: true,
+        unique: true,
+        maxLength: [regularStringLength, regularMessageStringLength]
+    },
     quantity: {
         type: Number,
         required: true,
@@ -18,12 +23,20 @@ const Product = mongoose.model('Product', {
     price: {
         type: Number,
         required: true,
-        validate: {
-            validator: function (price){
-                return price > 0 ;
+        validate: [
+            {
+                validator: function (price){
+                    return price > 0 ;
+                },
+                message: props => `${props.value} is less than 0! Price should be positive`
             },
-            message: props => `${props.value} is less than 0! Price should be positive`
-        }
+            {
+                validator: function(price) {
+                    return price.toFixed(2) === price;
+                },
+                message: props => `${props.value} has more than 2 decimal places! Price should have at most 2 decimal places`
+            }
+        ]
     },
     productDetails: {
         type:

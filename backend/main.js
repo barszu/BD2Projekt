@@ -1,18 +1,21 @@
-import {User} from "./models/userSchema.js";
-
-const port = 4000
-const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net/shopTest2'
-
 import express from 'express'
 import mongoose from 'mongoose'
-import jwt from 'jsonwebtoken'
 import multer from 'multer'
 import path from 'path'
 import cors from 'cors'
 
+import {User} from "./src/models/userSchema.js";
+import { Product } from './src/models/productSchema.js';
+import { findUser } from "./src/routes/userRouter.js"
+import userRouter from "./src/routes/userRouter.js";
+import productRouter from "./src/routes/productRouter.js";
+
+const port = 4000
+const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net'
+const dataBaseName = 'shopTest2'
 
 
-import { Product } from './models/productSchema.js'
+
 
 
 
@@ -22,23 +25,17 @@ app.use(express.json()) //allows us to parse incoming json data
 app.use(cors()) //allows us to make requests from the frontend
 
 // db connection
-mongoose.connect(dbUrl)
+mongoose.connect(`${dbUrl}/${dataBaseName}`)
     .then(() => console.log('DB connected'))
     .catch(err => console.log('DB connection ERR', err))
 
 //api
 
+app.use('/users', userRouter)
+app.use('/products', productRouter)
+
 app.get('/', async (req, res) => {
-    // res.send('Hello from server')
-    const newUser = new User({
-        login: 'Kuba11',
-        email: 'kuba11@g.com',
-        password: '123'
-    })
-    const savedUser = await newUser.save();
-    console.log(savedUser)
-    const fetchedUsers = await User.find({});
-    res.json(fetchedUsers)
+    res.send('Hello from server');
 })
 
 // Image Storage
@@ -62,169 +59,6 @@ app.post('/upload', upload.single('product'), (req, res) => {
 
     })
 })
-
-// add product route #TODO
-app.post('/addproduct', async (req, res) => {
-    const allProducts = await Product.find({})
-    let id = 1;
-    if (allProducts.length > 0) {
-        let lastProduct = allProducts.slice(-1)[0];
-        id = lastProduct.id + 1;
-    }
-    const product = new Product({
-        id: id,
-        name: req.body.name,
-        image: req.body.image,
-        category: req.body.category,
-        new_price: req.body.new_price,
-        old_price: req.body.old_price,
-        date: req.body.date,
-        available: req.body.available
-    })
-    console.log('Product', product)
-    try {
-        await product.save()
-        console.log('Product saved')
-        res.json({
-            success: true,
-            message: 'Product saved',
-            name: req.body.name
-        })
-    } catch (err) {
-        res.status(500).send
-    }
-})
-
-//remove product route #TODO
-app.post('/removeproduct', async (req, res) => {
-    await Product.findOneAndDelete({ id: req.body.id })
-    console.log('Product removed')
-    res.json({
-        success: true,
-        message: 'Product removed',
-        id: req.body.id,
-        name: req.body.name
-    })
-})
-
-//get all products route
-app.get('/allproducts', async (req, res) => {
-    const products = await Product.find({})
-    console.log('All products', products)
-    res.json(products)
-})
-
-// endpoint for registering of new users
-app.post('/signup', async (req, res) => {
-    const userData = {
-        email: req.body.email,
-        password: req.body.password,
-        name: req.body.name
-    }
-    const isUserExist = await User.findOne({ email: userData.email })
-    if (isUserExist) {
-        return res.status(400).json({
-            success: false,
-            message: 'User with that email already exists',
-            errors: 'User already exists'
-        })
-    }
-    // TODO
-    let cart = {};
-    for (let i = 0; i < 300; i++) {cart[i] = 0;}
-
-    const user = new User({
-        name: userData.name,
-        email: userData.email,
-        password: userData.password,
-        cartData: cart
-    })
-
-    await user.save() //add user to db
-
-    const data = { //data for jwt (json web token)
-        user: {id: user.id}
-    }
-
-    const token = jwt.sign(data, 'secret_ecom');
-    res.json({
-        success: true,
-        token: token,
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        }
-    })
-
-
-})
-
-// endpoint for logging in
-app.post('/login', async (req, res) => {
-    const userDataReq = {
-        email: req.body.email,
-        password: req.body.password
-    }
-    const dbUser = await User.findOne({email: userDataReq.email})
-    if (!dbUser){
-        return res.status(400).json({
-            success: false,
-            message: 'User with that email does not exist',
-            errors: 'User does not exist'
-        })
-    }
-
-    const passCompare = dbUser.password === userDataReq.password
-
-    if (passCompare){
-        const data = {
-            user: {id: dbUser.id}
-        }
-        const token = jwt.sign(data, 'secret_ecom')
-        res.json({
-            success: true,
-            token: token,
-            user: {
-                id: dbUser.id,
-                name: dbUser.name,
-                email: dbUser.email
-            }
-
-        })
-    }
-    else {
-        res.status(400).json({
-            success: false,
-            message: 'Invalid password',
-            errors: 'Invalid password'
-        })
-    }
-
-})
-
-// middleware for finding user by token
-const findUser = async (req, res, next) => { //TODO not tested!
-    const token = req.header('auth-token')
-    if (!token) {
-        return res.status(401).json({
-            success: false,
-            errors: 'No token found, authorization denied',
-            message: 'Authenticate using a valid token'
-        })
-    }
-    try {
-        const decoded = jwt.verify(token, 'secret_ecom')
-        req.user = decoded.user
-        next()
-    } catch (err) {
-        res.status(400).json({
-            success: false,
-            errors: "Token is not valid",
-            message: 'Provided token is not valid'
-        })
-    }
-}
 
 // endpoint for updateing whole cart TODO change that, not tested
 app.post('/updatecart', findUser, async (req, res) => {
