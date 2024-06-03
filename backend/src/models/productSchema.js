@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const regularStringLength = 100
 const regularMessageStringLength = `Cannot be longer than ${regularStringLength} characters`
 
-const Product = mongoose.model('Product', {
+const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -15,7 +15,7 @@ const Product = mongoose.model('Product', {
         required: true,
         validate: {
             validator: function (quantity){
-                return Number.isInteger(quantity) && quantity > 0 ;
+                return Number.isInteger(quantity) && quantity >= 0 ;
             },
             message: props => `${props.value} quantity should be positive and have Integer value`
         }
@@ -32,7 +32,7 @@ const Product = mongoose.model('Product', {
             },
             {
                 validator: function(price) {
-                    return price.toFixed(2) === price;
+                    return Number(price.toFixed(2)) === price;
                 },
                 message: props => `${props.value} has more than 2 decimal places! Price should have at most 2 decimal places`
             }
@@ -55,7 +55,15 @@ const Product = mongoose.model('Product', {
         required: true},
     imageUrl: {type: String, required: true},
     available: {type: Boolean, default: true},
-
 });
+
+ProductSchema.pre('save', function(next) {
+    if (this.quantity === 0) {
+        this.available = false;
+    }
+    next();
+});
+
+const Product = mongoose.model('Product', ProductSchema);
 
 export { Product }

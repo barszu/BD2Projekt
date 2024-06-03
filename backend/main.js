@@ -9,6 +9,7 @@ import { Product } from './src/models/productSchema.js';
 import { findUser } from "./src/routes/userRouter.js"
 import userRouter from "./src/routes/userRouter.js";
 import productRouter from "./src/routes/productRouter.js";
+import cartRouter from "./src/routes/cartRouter.js";
 
 const port = 4000
 const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net'
@@ -33,6 +34,7 @@ mongoose.connect(`${dbUrl}/${dataBaseName}`)
 
 app.use('/users', userRouter)
 app.use('/products', productRouter)
+app.use('/cart' , cartRouter)
 
 app.get('/', async (req, res) => {
     res.send('Hello from server');
@@ -60,38 +62,7 @@ app.post('/upload', upload.single('product'), (req, res) => {
     })
 })
 
-// endpoint for updateing whole cart TODO change that, not tested
-app.post('/updatecart', findUser, async (req, res) => {
-    try {
-        const userData = await User.findOne({_id: req.user.id})
-        if (!userData) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found in DB'
-            });
-        }
 
-        if (!req.body.cartItems) {
-            return res.status(400).json({
-                success: false,
-                message: 'Bad request, cartItems missing'
-            });
-        }
-
-        userData.cartData = req.body.cartItems
-        await User.findOneAndUpdate({_id: userData._id}, {cartData: userData.cartData})
-        res.json({
-            success: true,
-            message: 'Cart updated'
-        })
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: 'Server error probably DB error'
-        });
-    }
-
-});
 
 
 

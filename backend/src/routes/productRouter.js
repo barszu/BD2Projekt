@@ -2,6 +2,7 @@ import express from "express";
 import {Product} from "../models/productSchema.js";
 
 //TODO autenticate the access wia req.header 'app-auth-token'
+import validateBodyJsonSchema from "../middleware/structureValidatorMiddleware.js";
 
 
 
@@ -15,9 +16,9 @@ const router = express.Router()
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  *
- * data can be projected by passing filter object in body eq:
+ * data can be projected by passing projection object in body eq:
  * @example
- * body.filter = {
+ * body.projection = {
  *     "name":1,
  *     "quantity":1,
  *     "price":1,
@@ -25,9 +26,9 @@ const router = express.Router()
  * }
  */
 router.get('/list', async (req, res) => {
-    const filter = req.body.filter || {}
+    const projection = req.body.projection || {}
     try {
-        const products = await Product.find({}, filter)
+        const products = await Product.find({}, projection)
         res.json(products)
     } catch (err) {
         res.status(500).json({
@@ -57,11 +58,8 @@ router.get('/list', async (req, res) => {
  * If the product is successfully saved, a success message is returned along with the product name.
  * If an error occurs while saving the product, a 500 status code is returned along with the error message.
  */
-router.post('/add', async (req, res) => {
-    // const requiredFields = [...]
-    //TODO has fields and image as string ???
+router.post('/add', validateBodyJsonSchema("newProduct" , Product ) ,async (req, res) => {
     const reqProduct = req.body.newProduct
-
     try {
         const isAlreadyInDB = await Product.findOne({name: reqProduct.name})
         if (isAlreadyInDB) {
@@ -83,11 +81,39 @@ router.post('/add', async (req, res) => {
     } catch (err) {
         res.status(500).json({
             success: false,
-            message: 'Failed to save to db:' + err.message,
+            message: 'Failed to save to db',
             errors: err
         })
     }
 
+
+})
+
+router.get('/get/:id', async (req, res) => {
+    const projection = req.body.projection || {}
+    const id = req.params.id
+    let product
+    try {
+        product = await Product.findOne({_id: id}, projection)
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to query from db, db not working or bad projection',
+            errors: err
+        })
+        return
+    }
+
+    if (product === null) {
+        res.status(404).json({
+            success: false,
+            message: 'Product not found in DB',
+            errors: 'Product with that _id not found in DB'
+        })
+    }
+    else {
+        res.json(product)
+    }
 
 })
 

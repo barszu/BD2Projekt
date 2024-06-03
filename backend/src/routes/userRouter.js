@@ -34,9 +34,9 @@ const router = express.Router();
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  *
- * data can be projected by passing filter object in body eq:
+ * data can be projected by passing projection object in body eq:
  * @example
- * body.filter = {
+ * body.projection = {
  *     "customerData":1,
  *     "login":1,
  *     "email":1,
@@ -46,10 +46,10 @@ const router = express.Router();
  * }
  */
 router.get('/list', async (req, res) => {
-    const filter = req.body.filter || {}
+    const projection = req.body.projection || {}
 
     try {
-        const fetchedUsers = await User.find({}, filter);
+        const fetchedUsers = await User.find({}, projection);
         res.json(fetchedUsers);
     } catch (err) {
         res.status(500).json({
@@ -285,6 +285,8 @@ router.post('/login', async (req, res) => {
 
 /**
  * Middleware for finding user (userID) by token user like {_id: ObjectId , ...}
+ * in addition, middleware checks if that user exist in db
+ *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
@@ -302,7 +304,26 @@ router.post('/login', async (req, res) => {
  * }
  *
  */
-export const findUser = async (req, res, next) => { //TODO not tested!
+export const findUser = async (req, res, next) => {
+    //TODO not tested!
+    const reqUser = req.body.user
+    if (reqUser._id) {
+        // by passing user auth
+        if (! User.exists({_id : reqUser._id}) ){
+            return res.status(404).json({
+                success: false,
+                message: "That user does not exist in db",
+                errors: `User with provided _id: ${reqUser._id} does not exist in db`
+            })
+        }
+        else {
+            return next()
+        }
+
+    }
+
+
+
     const token = req.header('user-auth-token')
     if (!token) {
         return res.status(401).json({
@@ -313,7 +334,18 @@ export const findUser = async (req, res, next) => { //TODO not tested!
     }
 
     try {
-        req.user = getUserByToken(token)
+        const user = getUserByToken(token)
+
+        if (! User.exists({_id : user._id}) ){
+            res.status(404).json({
+                success: false,
+                message: "That user does not exist in db",
+                errors: `User with provided _id: ${user._id} does not exist in db`
+            })
+        }
+
+        // req.user = getUserByToken(token)
+        req.user = user
         next()
     } catch (err) {
         res.status(400).json({
@@ -322,6 +354,9 @@ export const findUser = async (req, res, next) => { //TODO not tested!
             message: 'Provided token is not valid'
         })
     }
+
+
+
 }
 
 
