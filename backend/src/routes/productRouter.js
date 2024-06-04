@@ -9,7 +9,6 @@ import validateBodyJsonSchema from "../middleware/structureValidatorMiddleware.j
 const router = express.Router()
 
 
-//get all products route
 /**
  * Endpoint for getting all products data
  * @route GET /all
@@ -27,8 +26,41 @@ const router = express.Router()
  */
 router.get('/list', async (req, res) => {
     const projection = req.body.projection || {}
+    const filter = req.body.filter || {}
     try {
-        const products = await Product.find({}, projection)
+        const products = await Product.find(filter, projection)
+        res.json(products)
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to query from db:' + err.message,
+            errors: err
+        })
+    }
+})
+
+/**
+ * Endpoint for getting all available products
+ * @route GET /available
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ *
+ * The request body can optionally contain a projection object to specify the fields to be returned in the response.
+ * @example
+ * req.body.projection = {
+ *     "name":1,
+ *     "quantity":1,
+ *     "price":1,
+ *     "productDetails":1,
+ * }
+ *
+ * The endpoint will return only those products where the 'available' field is set to true.
+ * If an error occurs while querying the database, a 500 status code is returned along with the error message.
+ */
+router.get('/available', async (req, res) => {
+    const projection = req.body.projection || {}
+    try {
+        const products = await Product.find({available: true}, projection)
         res.json(products)
     } catch (err) {
         res.status(500).json({
@@ -89,6 +121,29 @@ router.post('/add', validateBodyJsonSchema("newProduct" , Product ) ,async (req,
 
 })
 
+/**
+ * Endpoint for getting a specific product by its id
+ * @route GET /get/:id
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ *
+ * The request parameter should contain the id of the product to be retrieved.
+ * @example
+ * GET /get/60d5ec9af682fbd39cc1ecd5
+ *
+ * The request body can optionally contain a projection object to specify the fields to be returned in the response.
+ * @example
+ * req.body.projection = {
+ *     "name":1,
+ *     "quantity":1,
+ *     "price":1,
+ *     "productDetails":1,
+ * }
+ *
+ * If the product is found, it is returned in the response.
+ * If the product is not found, a 404 status code is returned.
+ * If an error occurs while querying the database, a 500 status code is returned along with the error message.
+ */
 router.get('/get/:id', async (req, res) => {
     const projection = req.body.projection || {}
     const id = req.params.id

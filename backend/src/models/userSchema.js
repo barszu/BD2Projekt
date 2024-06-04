@@ -67,12 +67,12 @@ const CartItemSchema = new Schema({
     }
 })
 
-const CartSchema = new Schema({
-    type: [CartItemSchema],
-    default: [] //domyślnie pusta lista obiektow
-});
+// const CartSchema = new Schema({
+//     type: [CartItemSchema],
+//     default: [] //domyślnie pusta lista obiektow
+// });
 
-
+// for one order
 const OrderSchema = new Schema({
     date: {
         type: Date,
@@ -85,8 +85,14 @@ const OrderSchema = new Schema({
         enum: ['Paid', 'Pending', 'Failed']
     },
     products: {
-        type: CartSchema,
-        required: true
+        type: [CartItemSchema],
+        required: true,
+        validate: {
+            validator: function (products){
+                return products.length > 0 ;
+            },
+            message: props => `Order should have at least one product`
+        }
     },
     totalPrice: {
         type: Number,
@@ -115,7 +121,7 @@ const UserSchema = new Schema({
     login: { type: String, required: true, unique: true , validate: /^[a-zA-Z0-9]{5,}$/ },
     email: { type: String, required: true, unique: true , validate: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ },
     password: { type: String, required: true },
-    cartData: {type: CartSchema},
+    cartData: {type: [CartItemSchema] , default: [] }, //domyślnie pusta lista obiektow
     orders: { type: [OrderSchema], default: [] } // domyślnie pusta lista
 });
 

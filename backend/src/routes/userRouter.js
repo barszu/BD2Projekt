@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const userEncodePass = "shop_user"
 const router = express.Router();
 
-//TODO autenticate the access wia req.header 'app-auth-token'
+//TODO authenticate the access wia req.header 'app-auth-token'
 
 /**
  * User full data object: (db representation)
@@ -44,12 +44,17 @@ const router = express.Router();
  *     "cartData":1,
  *     "orders":1
  * }
+ *
+ * body.filter = {
+ *     "login": "some_login",
+ * }
  */
 router.get('/list', async (req, res) => {
     const projection = req.body.projection || {}
+    const filter = req.body.filter || {}
 
     try {
-        const fetchedUsers = await User.find({}, projection);
+        const fetchedUsers = await User.find(filter, projection);
         res.json(fetchedUsers);
     } catch (err) {
         res.status(500).json({
@@ -145,7 +150,7 @@ router.post('/add', async (req, res) => {
  */
 function getUserToken(user){
     const jwt_data = { //data for jwt (json web token)
-        user: {userId: user._id}
+        user: {_id: user._id}
     }
     return jwt.sign(jwt_data, userEncodePass)
 }
@@ -307,7 +312,7 @@ router.post('/login', async (req, res) => {
 export const findUser = async (req, res, next) => {
     //TODO not tested!
     const reqUser = req.body.user
-    if (reqUser._id) {
+    if (reqUser && reqUser._id) {
         // by passing user auth
         if (! User.exists({_id : reqUser._id}) ){
             return res.status(404).json({
@@ -350,7 +355,7 @@ export const findUser = async (req, res, next) => {
     } catch (err) {
         res.status(400).json({
             success: false,
-            errors: "Token is not valid",
+            errors: err,
             message: 'Provided token is not valid'
         })
     }

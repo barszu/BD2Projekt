@@ -57,12 +57,14 @@ const ProductSchema = new mongoose.Schema({
     available: {type: Boolean, default: true},
 });
 
-ProductSchema.pre('save', function(next) {
-    if (this.quantity === 0) {
-        this.available = false;
-    }
-    next();
-});
+// niech available to bedzie mozliwosc zablokowania towaru przez sklep
+
+// ProductSchema.pre('save', function(next) {
+//     if (this.quantity === 0) {
+//         this.available = false;
+//     }
+//     next();
+// });
 
 const Product = mongoose.model('Product', ProductSchema);
 

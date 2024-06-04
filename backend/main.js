@@ -4,9 +4,7 @@ import multer from 'multer'
 import path from 'path'
 import cors from 'cors'
 
-import {User} from "./src/models/userSchema.js";
-import { Product } from './src/models/productSchema.js';
-import { findUser } from "./src/routes/userRouter.js"
+
 import userRouter from "./src/routes/userRouter.js";
 import productRouter from "./src/routes/productRouter.js";
 import cartRouter from "./src/routes/cartRouter.js";
