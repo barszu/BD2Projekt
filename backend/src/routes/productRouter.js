@@ -1,7 +1,6 @@
 import express from "express";
 import {Product} from "../models/productSchema.js";
 
-//TODO autenticate the access wia req.header 'app-auth-token'
 import validateBodyJsonSchema from "../middleware/structureValidatorMiddleware.js";
 
 

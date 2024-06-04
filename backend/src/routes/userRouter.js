@@ -1,11 +1,10 @@
 import express from 'express'
 import {User} from "../models/userSchema.js";
 import jwt from "jsonwebtoken";
+import bcrypt from 'bcrypt';
 
 const userEncodePass = "shop_user"
 const router = express.Router();
-
-//TODO authenticate the access wia req.header 'app-auth-token'
 
 /**
  * User full data object: (db representation)
@@ -75,7 +74,7 @@ router.get('/list', async (req, res) => {
 async function addNewUser(userData){
     let isUserExist;
     try {
-        isUserExist = await User.findOne({ email: userData.email } )
+        isUserExist = await User.findOne({ email: userData.email } , {login: 1} )
     }
     catch (err) {
         return {
@@ -93,6 +92,12 @@ async function addNewUser(userData){
         }
     }
     try {
+        // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        // Replace the plain text password with the hashed password
+        userData.password = await bcrypt.hash(userData.password, salt);
+
+
         const user = new User(userData)
         const savedUser = await user.save()
         return {
@@ -122,8 +127,6 @@ async function addNewUser(userData){
  *
  */
 router.post('/add', async (req, res) => {
-    //TODO autenticate req from app via req.header
-    //TODO hash password !
     try {
         const userData = req.body.user //as in schema
         const result = await addNewUser(userData)
@@ -187,7 +190,6 @@ function getUserByToken(token){
  * }
  */
 router.post('/signup', async (req, res) => {
-    //TODO autenticate req from app via req.header
     try {
         const userData = req.body.user //as in schema
         const addUserResult = await addNewUser(userData)
@@ -243,7 +245,7 @@ router.post('/login', async (req, res) => {
         const dbUser = await User.findOne({
             email: userData.email,
             login: userData.login
-        }) //TODO albo po tylko loginie?
+        } , {login: 1 , email: 1 , password: 1}) //TODO albo po tylko loginie?
 
         if (!dbUser){
             return res.status(400).json({
@@ -253,8 +255,8 @@ router.post('/login', async (req, res) => {
             })
         }
 
-        const passwordCompare = dbUser.password === userData.password
-        // TODO hash password !
+        // const passwordCompare = dbUser.password === userData.password
+        const passwordCompare = await bcrypt.compare(userData.password, dbUser.password);
 
         if (passwordCompare){
             const token = getUserToken(dbUser)
@@ -310,7 +312,6 @@ router.post('/login', async (req, res) => {
  *
  */
 export const findUser = async (req, res, next) => {
-    //TODO not tested!
     const reqUser = req.body.user
     if (reqUser && reqUser._id) {
         // by passing user auth

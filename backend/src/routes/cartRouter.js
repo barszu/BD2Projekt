@@ -213,7 +213,7 @@ router.post('/sell' , findUser , async (req , res) => {
             }
         }
 
-        // cart verification passed, selling... //TODO add payment
+        // cart verification passed, selling... //TODO add dummy payment ?
         let totalPrice = 0
 
 

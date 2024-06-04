@@ -1,11 +1,10 @@
 /**
- * Compares the structure of two objects.
+ * Compares the structure of two objects they have to be === (identical).
  * @param {Object} obj - The object to compare.
  * @param {Object} template - The template to compare against.
  * @returns {boolean|Array} - Returns true if the structures match. If they don't match, returns an array of keys that are missing in the object.
  */
 const compareStructure = (obj, template) => {
-    //TODO sprawdza JSONY jako ===, moze wystarczy parsowac dane clienta przez mongo???
     if (typeof obj !== typeof template) return false;
     if (typeof obj !== 'object' || obj === null || template === null) return obj === template;
 
@@ -51,6 +50,12 @@ const validateJsonStructure = (template) => {
     };
 };
 
+/**
+ * Middleware for validating the JSON request body against a given schema.
+ * @param {string} bodyFieldName - The name of the field in the request body to validate.
+ * @param {Object} schema - The schema to validate against. The schema should be a constructor function that throws an error if the validation fails.
+ * @returns {Function} - Returns a middleware function that validates the request body against the schema. If the validation fails, the middleware responds with a 400 status code and an error message. If the validation passes, the middleware calls the next middleware in the stack.
+ */
 const validateBodyJsonSchema = (bodyFieldName, schema) => {
     return (req, res, next) => {
         if (!req.body.hasOwnProperty(bodyFieldName)) {
@@ -62,9 +67,7 @@ const validateBodyJsonSchema = (bodyFieldName, schema) => {
         }
 
         try {
-            // TODO check if schema is a schema by validate -> don't create an object
             const isValid = new schema(req.body[bodyFieldName]);
-            // const isValid = schema.validate(req.body[bodyFieldName]);
         } catch (error) {
             return res.status(400).json({
                 success: false,

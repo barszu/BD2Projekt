@@ -13,7 +13,7 @@ const port = 4000
 const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net'
 const dataBaseName = 'shopTest2'
 
-
+//TODO autenticate req from app via req.header
 
 
 
