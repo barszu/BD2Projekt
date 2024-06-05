@@ -116,6 +116,14 @@ function Login() {
                 <form className="login-form">
                     <h2>Zaloguj się</h2>
                     <input
+                        name={"login"}
+                        value={formDataUnion.login}
+                        type="text"
+                        onChange={formChangeHandler}
+                        placeholder="Username TODO"
+                        required
+                    />
+                    <input
                         name={"email"}
                         value={formDataUnion.email}
                         type="email"
@@ -133,7 +141,7 @@ function Login() {
                     />
                     <button
                         type={"submit"}
-                        onClick={(event)=> logInUser(event)}
+                        onClick={(event) => logInUser(event)}
                     >Zaloguj się
                     </button>
                     <p>
