@@ -241,7 +241,7 @@ router.post('/sell' , findUser , async (req , res) => {
         dbUser.orders.push({
             paymentStatus: 'Paid',
             products: dbUser.cartData,
-            totalPrice: totalPrice,
+            totalPrice: Number(totalPrice.toFixed(2)),
         })
 
         dbUser.cartData = []
