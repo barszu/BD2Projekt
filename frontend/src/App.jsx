@@ -14,7 +14,7 @@ function App() {
         <div className="App">
             <ProductsProvider>
                 <AuthProvider>
-                    <ShopContextProvider>
+                    {/*<ShopContextProvider>*/}
                         <BrowserRouter>
                             <Navbar />
                             {/*navbars bedzie widoczne w kazdej stronie*/}
@@ -28,14 +28,34 @@ function App() {
                                 <Route path="*" element={<h1>Not Found</h1>} />
                             </Routes>
                         </BrowserRouter>
-                    </ShopContextProvider>
+                    {/*</ShopContextProvider>*/}
                 </AuthProvider>
             </ProductsProvider>
 
 
         </div>
+        // <div className="App">
+        //     <ProductsProvider>
+        //         <AuthProvider>
+        //                 <BrowserRouter>
+        //                     <Routes>
+        //                         <Route path="/" element={<Shop/>}/>
+        //                         <Route path="/cart" element={<Cart/>}/>
+        //                         <Route path="/login" element={<Login/>}/>
+        //                         <Route path="/products/:id" element={<ProductPage/>}/>
+        //
+        //
+        //                         <Route path="*" element={<h1>Not Found</h1>}/>
+        //                     </Routes>
+        //                 </BrowserRouter>
+        //         </AuthProvider>
+        //     </ProductsProvider>
+        //
+        //
+        //
+        // </div>
 
-        )
+    )
 
 }
 

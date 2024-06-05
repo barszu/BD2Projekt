@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import {PRODUCTS} from "../dummy/dummyProducts.js";
 import {useAuth} from "./authContext.jsx";
 
 //global states -> global varaiables

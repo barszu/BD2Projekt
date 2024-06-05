@@ -16,7 +16,7 @@ function Login() {
     const [formDataUnion, setFormDataUnion] = useState({
         email: '',
         password: '',
-        username: ''
+        login: ''
     });
 
     const formChangeHandler = (e) => {
@@ -36,18 +36,19 @@ function Login() {
         }
 
         let responseData
-        await fetch('http://localhost:4000/login', {
+        await fetch('http://localhost:4000/users/login', {
             method: 'POST',
             headers: {
                 Accept: 'application/form-data',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                email: formDataUnion.email,
-                password: formDataUnion.password,
-                // name: formDataUnion.username
-            }),
-
+                user : {
+                    email: formDataUnion.email,
+                    login: formDataUnion.login,
+                    password: formDataUnion.password
+                }
+            })
         }).then(response => {
             return response.json();
         }).then(data => {
@@ -58,9 +59,7 @@ function Login() {
         })
 
         if (responseData.success) {
-            // localStorage.setItem('auth-token', responseData.token);
-            login();
-            // alert("User registered successfully");
+            login(responseData.token);
             navigate("/");
         }
         else {
@@ -77,17 +76,19 @@ function Login() {
         }
 
         let responseData
-        await fetch('http://localhost:4000/signup', {
+        await fetch('http://localhost:4000/users/signup', {
             method: 'POST',
             headers: {
                 Accept: 'application/form-data',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                email: formDataUnion.email,
-                password: formDataUnion.password,
-                name: formDataUnion.username
-            }),
+                user : {
+                    email: formDataUnion.email,
+                    login: formDataUnion.login,
+                    password: formDataUnion.password
+                }
+            })
 
         }).then(response => {
             return response.json();
@@ -143,8 +144,8 @@ function Login() {
                 <form className="registration-form">
                     <h2>Zarejestruj się</h2>
                     <input
-                        name={"username"}
-                        value={formDataUnion.username}
+                        name={"login"}
+                        value={formDataUnion.login}
                         type="text"
                         onChange={formChangeHandler}
                         placeholder="Username TODO"
