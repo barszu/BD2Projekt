@@ -7,7 +7,7 @@ import { useAuth } from '../../context/authContext.jsx';
 const Product = (props) => {
     const { isLoggedIn, login, logout } = useAuth();
     const productData = props.data;
-    // const { addToCart , cartItems } = useContext(CartContext)
+    const { addToCart , cartItems } = useContext(CartContext)
     return (
         <div className="product">
             <Link key={productData._id} to={`/products/${productData._id}`}>
@@ -18,11 +18,8 @@ const Product = (props) => {
                 </div>
             </Link>
                 {isLoggedIn &&
-                    // (<button className="addToCartBttn" onClick={() => addToCart(productData)}>
-                    //     Dodaj do koszyka! {cartItems[id] ? `(${cartItems[id]})` : null}
-                    // </button>)
-                    (<button className="addToCartBttn" >
-                        Dodaj do koszyka!
+                    (<button className="addToCartBttn" onClick={() => addToCart(productData._id)}>
+                        Dodaj do koszyka! { cartItems && cartItems.find((item) => item._id === productData._id) ? cartItems.find((item) => item._id === productData._id).quantity : ""}
                     </button>)
                 }
         </div>

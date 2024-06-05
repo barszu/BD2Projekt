@@ -16,7 +16,7 @@ const ProductPage = () => {
 
     const { id } = useParams();
     const product = products.find((product) => product._id === id);
-    // const { addToCart , cartItems , removeFromCart , removeCompletelyFromCart  } = useContext(CartContext)
+    const { addToCart , cartItems , removeFromCart , removeCompletelyFromCart  } = useContext(CartContext)
     const { isLoggedIn, login, logout } = useAuth();
 
     console.log(products);
@@ -34,19 +34,19 @@ const ProductPage = () => {
                         <p>{product.productDetails.paragraphDescription}</p>
                     </div>
                     <div className="p-bttn-section">
-                        {/*{isLoggedIn && (*/}
-                        {/*    <>*/}
-                        {/*    <button className="p-addToCartBttn" onClick={() => addToCart(id)}>*/}
-                        {/*    Dodaj do koszyka! {cartItems[id] ? `(${cartItems[id]})` : null}*/}
-                        {/*</button>*/}
-                        {/*<button className="p-removeOneFromCartBttn" onClick={() => removeFromCart(id)}>*/}
-                        {/*    Usuń z koszyka jedną sztuke! {cartItems[id] ? `(${cartItems[id]})` : null}*/}
-                        {/*</button>*/}
-                        {/*<button className="p-removeCompletlyFromCartBttn" onClick={() => removeCompletelyFromCart(id)}>*/}
-                        {/*    Usuń z koszyka wszystkie sztuki! {cartItems[id] ? `(${cartItems[id]})` : null}*/}
-                        {/*</button>*/}
-                        {/*    </>*/}
-                        {/*)}*/}
+                        {isLoggedIn && (
+                            <>
+                                <button className="p-addToCartBttn" onClick={() => addToCart(product._id)}>
+                                    Dodaj do koszyka!
+                                </button>
+                                <button className="p-removeOneFromCartBttn" onClick={() => removeFromCart(product._id)}>
+                                    Usuń z koszyka jedną sztuke!
+                                </button>
+                                <button className="p-removeCompletlyFromCartBttn" onClick={() => removeCompletelyFromCart(product._id)}>
+                                    Usuń z koszyka wszystkie sztuki!
+                                </button>
+                            </>
+                        )}
                     </div>
 
                 </div>

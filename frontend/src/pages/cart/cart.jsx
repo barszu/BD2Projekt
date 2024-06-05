@@ -7,15 +7,36 @@ import "./cart.css"
 
 const Cart = () => {
 
-    const {clearCart , cartItems , getTotalCartAmount} = useContext(CartContext);
+    const {cartItems} = useContext(CartContext);
     const navigate = useNavigate();
 
-    const totalCartAmount = getTotalCartAmount();
-    const [displayedTotalCartAmount , setDisplayedTotalCartAmount] = useState(totalCartAmount);
+    const [allProducts, setAllProducts] = useState([]);
+
+    const fetchProducts = async () => {
+        await fetch("http://localhost:4000/products/list")
+            .then((response) => response.json())
+            .then((data) => {
+                setAllProducts(data);
+                console.log("pobrano produkty wszystkie")
+            })
+    }
 
     useEffect(() => {
-        setDisplayedTotalCartAmount(totalCartAmount);
-    }, [totalCartAmount]);
+        fetchProducts();
+    }, []);
+
+    const [totalAmount, setTotalAmount] = useState(0);
+
+    useEffect(() => {
+        let total = 0;
+        for (let item of cartItems) {
+            const ProductData = allProducts.find((product) => product._id === item.productId);
+            if (ProductData) {
+                total += ProductData.price * item.quantity;
+            }
+        }
+        setTotalAmount(total.toFixed(2));
+    }, [allProducts, cartItems]);
 
     return (
         <div className="cart">
@@ -25,19 +46,23 @@ const Cart = () => {
                 </h1>
             </div>
             <div className="cartItems">
-                {PRODUCTS.map((product) => {
-                    if (cartItems[product.id] > 0){ //jesli w koszyku jest wiecej niz 0 sztuk danego produktu
-                        return <CartItem data={product}/>
-                    }
-
-                })}
+                {
+                    cartItems.map((item) => {
+                        const ProductData = allProducts.find((product) => product._id === item.productId);
+                        return <CartItem key={item.productId} data={
+                            {
+                                ...ProductData,
+                                quantity: item.quantity
+                            }
+                        }/>
+                    })
+                }
             </div>
-            {totalCartAmount > 0 ?
+            {cartItems.length ?
                 <div className="checkout-correct">
-                    <p> Podsumowanie: {displayedTotalCartAmount} zł</p>
+                    <p> Podsumowanie: {totalAmount} zł</p>
                     <button onClick={() => navigate("/")}> Kontynuuj Zakupy</button>
-                    <button onClick={() => setDisplayedTotalCartAmount((prev)=>prev+1)}> Zapłać</button>
-                    <button onClick={() => clearCart()}> Wyczyść Koszyk</button>
+                    <button onClick={() => alert("zaplacono, ale nic sie nie stalo")}> Zapłać</button>
                 </div>
 
                 :

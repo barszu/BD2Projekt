@@ -8,7 +8,7 @@ const ProductsProvider = ({ children }) => {
     const fetchProducts = async () => {
         fetch('http://localhost:4000/products/available')
             .then((response) => response.json())
-            .then((data) => setProducts(data))
+            .then((data) => {setProducts(data); console.log("pobrano produkty available")})
             .catch((err) => console.log('Something went wrong with server... Is it running???', err));
     }
 
