@@ -53,13 +53,13 @@ router.get('/list', async (req, res) => {
  *     "productDetails":1,
  * }
  *
- * The endpoint will return only those products where the 'available' field is set to true.
+ * The endpoint will return only those products where the 'available' field is set to true and have quantity > 0.
  * If an error occurs while querying the database, a 500 status code is returned along with the error message.
  */
 router.get('/available', async (req, res) => {
     const projection = req.body.projection || {}
     try {
-        const products = await Product.find({available: true}, projection)
+        const products = await Product.find({available: true, quantity: { $gt: 0 }}, projection)
         res.json(products)
     } catch (err) {
         res.status(500).json({
