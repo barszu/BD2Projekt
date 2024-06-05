@@ -7,7 +7,7 @@ import "./cart.css"
 
 const Cart = () => {
 
-    const {cartItems} = useContext(CartContext);
+    const {cartItems , sellCart} = useContext(CartContext);
     const navigate = useNavigate();
 
     const [allProducts, setAllProducts] = useState([]);
@@ -29,14 +29,17 @@ const Cart = () => {
 
     useEffect(() => {
         let total = 0;
-        for (let item of cartItems) {
-            const ProductData = allProducts.find((product) => product._id === item.productId);
-            if (ProductData) {
-                total += ProductData.price * item.quantity;
+        if (Array.isArray(cartItems)) {
+            for (let item of cartItems) {
+                const ProductData = allProducts.find((product) => product._id === item.productId);
+                if (ProductData) {
+                    total += ProductData.price * item.quantity;
+                }
             }
         }
         setTotalAmount(total.toFixed(2));
     }, [allProducts, cartItems]);
+
 
     return (
         <div className="cart">
@@ -62,7 +65,10 @@ const Cart = () => {
                 <div className="checkout-correct">
                     <p> Podsumowanie: {totalAmount} zł</p>
                     <button onClick={() => navigate("/")}> Kontynuuj Zakupy</button>
-                    <button onClick={() => alert("zaplacono, ale nic sie nie stalo")}> Zapłać</button>
+                    <button onClick={() => {
+                        sellCart()
+                        navigate('/')
+                    }}> Zapłać</button>
                 </div>
 
                 :

@@ -91,6 +91,37 @@ export const ShopContextProvider = (props) => {
         return null;
     }
 
+    const sellCart = async () => {
+        const token = localStorage.getItem('auth-token');
+        await fetch('http://localhost:4000/cart/sell', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/form-data',
+                'Content-Type': 'application/json',
+                'user-auth-token': `${token}`
+            },
+        })
+            .then(response => {return response.json();})
+            .then(data => {
+                if (data.success) {
+                    setCart([]);
+                    alert("Your order has been placed successfully");
+                }
+                else if (data.message === 'Cart verification failed'){
+                    // wyswietl okno w ktorych uzytkonik zatwierdza zmiane koszyka
+                    const userConfirmation = window.confirm('Some products in your cart are no longer available. Do you want to remove them from cart?');
+                    if (userConfirmation) {
+                        setCart(data.newCart);
+                    }
+                }
+                else {
+                    alert("Something went wrong with your order");
+                    console.log(data);
+                }
+            })
+            .catch(err => {console.log("Something went wrong with server... Is it running???" , err);})
+    }
+
     // console.log(cartItems)
 
     const contextValue = {
@@ -100,7 +131,8 @@ export const ShopContextProvider = (props) => {
         removeCompletelyFromCart,
         setCartItemCount,
         getTotalCartItems,
-        getQuantity
+        getQuantity,
+        sellCart
     }
 
     return <CartContext.Provider value={contextValue}>{props.children}</CartContext.Provider>//provider -> track of all data, organize logic

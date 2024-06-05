@@ -14,6 +14,9 @@ const Navbar = () => {
 
     useEffect(() => {
         let sum = 0
+        if (!Array.isArray(cartItems)) {
+            return;
+        }
         for (let item of cartItems) {
             if (item.quantity) {
                 sum += item.quantity
