@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { CartContext } from "../../context/cartContext.jsx";
 import {Link} from "react-router-dom";
 import "./product.css";
@@ -6,20 +6,33 @@ import { useAuth } from '../../context/authContext.jsx';
 
 const Product = (props) => {
     const { isLoggedIn, login, logout } = useAuth();
-    const {id , productName , price , productImage } = props.data;
-    const { addToCart , cartItems } = useContext(CartContext)
+    const productData = props.data;
+    const { addToCart , cartItems , getQuantity } = useContext(CartContext)
+
+    const [quantity, setQuantity] = useState(0);
+
+    useEffect(() => {
+        const newQuantity = getQuantity(productData._id);
+        if (newQuantity){
+            setQuantity(newQuantity);
+        }
+        else {
+            setQuantity(0);
+        }
+    }, [cartItems]);
+
     return (
         <div className="product">
-            <Link key={id} to={`/products/${id}`}>
-                <img src={productImage} alt={productName}/>
+            <Link key={productData._id} to={`/products/${productData._id}`}>
+                <img src={productData.imageUrl} alt={productData.name}/>
                 <div className="product-info">
-                    <p className="product-name">{productName}</p>
-                    <p>{price} zł</p>
+                    <p className="product-name">{productData.name}</p>
+                    <p>{productData.price} zł</p>
                 </div>
             </Link>
                 {isLoggedIn &&
-                    (<button className="addToCartBttn" onClick={() => addToCart(id)}>
-                        Dodaj do koszyka! {cartItems[id] ? `(${cartItems[id]})` : null}
+                    (<button className="addToCartBttn" onClick={() => addToCart(productData._id)}>
+                        Dodaj do koszyka! {quantity > 0 && `(${quantity})`}
                     </button>)
                 }
         </div>
