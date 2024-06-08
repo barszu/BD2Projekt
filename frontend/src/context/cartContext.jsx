@@ -7,9 +7,11 @@ export const CartContext = React.createContext(null);
 
 export const ShopContextProvider = (props) => {
     const [cart, setCart] = useState([]);
-
+    const { isLoggedIn, login, logout } = useAuth();
     const fetchCart = async () => {
-        const token = localStorage.getItem('auth-token');
+        
+        if(isLoggedIn){
+            const token = localStorage.getItem('auth-token');
         fetch('http://localhost:4000/cart/own', {
             method: 'GET',
             headers: {
@@ -21,6 +23,7 @@ export const ShopContextProvider = (props) => {
             .then(response => {return response.json();})
             .then(data => {setCart(data.cartData);})
             .catch(err => {console.log("Something went wrong with server... Is it running???" , err);})
+        }
     }
 
     useEffect(() => {
