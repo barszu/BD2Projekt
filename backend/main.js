@@ -8,6 +8,7 @@ import cors from 'cors'
 import userRouter from "./src/routes/userRouter.js";
 import productRouter from "./src/routes/productRouter.js";
 import cartRouter from "./src/routes/cartRouter.js";
+import salesHistoryRouter from "./src/routes/saleshistoryRouter.js";
 
 const port = 4000
 const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net'
@@ -33,6 +34,7 @@ mongoose.connect(`${dbUrl}/${dataBaseName}`)
 app.use('/users', userRouter)
 app.use('/products', productRouter)
 app.use('/cart' , cartRouter)
+app.use('/salesHistory' , salesHistoryRouter)
 
 app.get('/', async (req, res) => {
     res.send('Hello from server');

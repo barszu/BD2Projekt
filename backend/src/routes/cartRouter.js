@@ -17,13 +17,47 @@ const router = express.Router()
  *
  * The endpoint will return the cart data of the current user.
  * If an error occurs while querying the database, a 500 status code is returned along with the error message.
+ *
+ * cartProjection is an optional parameter that can be used to specify which fields to include in the product data of the cart items.
+ *
+ * If cartProjection is not provided, the productData will not be included in the response.
+ *
+ * Positive example:
+ * res.body = {
+ *     success: true,
+ *     cartData: [
+ *         {
+ *             productId: '123456789012345678901234',
+ *             quantity: 2,
+ *             productData: { // if cartProjection is provided
+ *                 _id: '123456,
+ *                 name: 'Product name',
+ *             }
+ *         }
+ *     ]
+ * }
  */
 router.get('/own' , findUser , async (req, res) => {
     try {
+        const cartProjection = req.body.cartProjection
         const userData = await User.findOne({_id: req.user._id} , {_id: 1 , cartData: 1})
+        let cartData = userData.cartData
+
+        if (cartProjection){
+            cartData = []
+            for (let item of userData.cartData){
+                const dbProduct = await Product.findOne({_id: item.productId} , cartProjection)
+                cartData.push({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    productData: dbProduct
+                })
+            }
+        }
+
         res.json({
             success: true,
-            cartData: userData.cartData, //TODO albo cale informacje o produktach?
+            cartData: cartData,
         })
     } catch (err) {
         res.status(500).json({
@@ -182,9 +216,16 @@ async function verifyCart(cartData) {
  * @param {Object} req - Express request object. The request object should have a 'user' property with the user's id.
  * @param {Object} res - Express response object
  *
- * The endpoint will verify the cart data, update the database, and return the total price of the sold products.
- * If the cart verification fails, a 400 status code is returned along with the error message.
+ * The endpoint will verify the cart data,
+ *
+ * If a product is not available or the quantity is more than the available quantity,
+ * the product will be removed or the quantity will be adjusted.
+ * Then it will send a response with a 400 status code along with the updated cart data, and information about the verification.
+ *
  * If an error occurs while updating the database, a 500 status code is returned along with the error message.
+ *
+ * If cart verification passes, the products will be sold, the quantity of each product will be updated in the database, and
+ * the products will be added to the user's order history. The cart will be cleared. And ProductsSalesHistory will be updated.
  */
 
 // Mutex to prevent race conditions when verifying the cart
@@ -202,13 +243,18 @@ router.post('/sell' , findUser , async (req , res) => {
             const {fixedCart , cartError} = await verifyCart(dbUser.cartData)
 
             if (cartError === true) {
+                const oldCart =  JSON.parse(JSON.stringify(dbUser.cartData)  )  // 200 iq deep copy
+                dbUser.cartData = fixedCart
+                await dbUser.save({ session })
+
                 release();
                 return res.status(400).json({
                     success: false,
-                    message: 'Cart verification failed',
+                    message: 'Cart verification failed, cart has been fixed',
                     errors: 'Cart verification failed',
-                    newCart: fixedCart,
-                    oldCart: dbUser.cartData
+                    cartFixed: true,
+                    newCart: dbUser.cartData,
+                    oldCart: oldCart
                 });
             }
         }
@@ -229,7 +275,8 @@ router.post('/sell' , findUser , async (req , res) => {
                 new ProductSalesHistory({
                     productId: item.productId,
                     quantity: item.quantity,
-                    price: dbProduct.price
+                    price: dbProduct.price,
+                    userId: dbUser._id
                 }).save({ session })
             }
         }

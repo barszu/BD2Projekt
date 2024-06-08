@@ -28,9 +28,13 @@ router.get('/list', async (req, res) => {
     const filter = req.body.filter || {}
     try {
         const products = await Product.find(filter, projection)
-        res.json(products)
+
+        return res.json({
+            success: true,
+            products: products
+        })
     } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Failed to query from db:' + err.message,
             errors: err
@@ -60,9 +64,12 @@ router.get('/available', async (req, res) => {
     const projection = req.body.projection || {}
     try {
         const products = await Product.find({available: true, quantity: { $gt: 0 }}, projection)
-        res.json(products)
+        return res.json({
+            success: true,
+            products: products
+        })
     } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Failed to query from db:' + err.message,
             errors: err
@@ -94,23 +101,22 @@ router.post('/add', validateBodyJsonSchema("newProduct" , Product ) ,async (req,
     try {
         const isAlreadyInDB = await Product.findOne({name: reqProduct.name})
         if (isAlreadyInDB) {
-            res.status(409).json({
+            return res.status(409).json({
                 success: false,
                 message: 'Product already in DB with that name',
                 errors: `When trying to add ${reqProduct} found already ${isAlreadyInDB} in DB`
             })
-            return
         }
 
         const product = new Product(reqProduct)
         await product.save()
-        res.json({
+        return res.json({
             success: true,
             message: 'Product saved',
             name: req.body.name
         })
     } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Failed to save to db',
             errors: err
@@ -146,28 +152,31 @@ router.post('/add', validateBodyJsonSchema("newProduct" , Product ) ,async (req,
 router.get('/get/:id', async (req, res) => {
     const projection = req.body.projection || {}
     const id = req.params.id
-    let product
     try {
-        product = await Product.findOne({_id: id}, projection)
+        const product = await Product.findOne({_id: id}, projection)
+
+        if (!product) {
+            res.status(404).json({
+                success: false,
+                message: 'Product not found in DB',
+                errors: 'Product with that _id not found in DB'
+            })
+        }
+
+        return res.json({
+            success: true,
+            message: 'Product found',
+            product: product
+        })
+
     } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Failed to query from db, db not working or bad projection',
             errors: err
         })
-        return
     }
 
-    if (product === null) {
-        res.status(404).json({
-            success: false,
-            message: 'Product not found in DB',
-            errors: 'Product with that _id not found in DB'
-        })
-    }
-    else {
-        res.json(product)
-    }
 
 })
 

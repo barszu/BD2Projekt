@@ -131,13 +131,13 @@ router.post('/add', async (req, res) => {
         const userData = req.body.user //as in schema
         const result = await addNewUser(userData)
         if (result.success === true){
-            res.json(result)
+            return res.json(result)
         }
         else {
-            res.status(400).json(result)
+            return res.status(400).json(result)
         }
     } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Failed to add user' + err.message,
             errors: err
@@ -194,13 +194,12 @@ router.post('/signup', async (req, res) => {
         const userData = req.body.user //as in schema
         const addUserResult = await addNewUser(userData)
         if (addUserResult.success === false){
-            res.status(400).json(addUserResult)
-            return
+            return res.status(400).json(addUserResult)
         }
         const user = addUserResult.user
 
         const token = getUserToken(user)
-        res.json({
+        return res.json({
             success: true,
             token: token,
             user: {
@@ -210,7 +209,7 @@ router.post('/signup', async (req, res) => {
             }
         })
     } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Failed to sign up user' + err.message,
             errors: err
@@ -227,6 +226,11 @@ router.post('/signup', async (req, res) => {
  *
  * body.user - user full data object: (db representation) ! only required => email, password, login
  *
+ * if login is provided, it will be used to find user
+ * else email will be used,
+ *
+ * if none of them is provided, error will be returned
+ *
  * res.body = { //success = true
  *    success: true
  *    token: 'jwt_token'
@@ -242,15 +246,18 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const userData = req.body.user //as in schema
-        const dbUser = await User.findOne({
-            email: userData.email,
-            login: userData.login
-        } , {login: 1 , email: 1 , password: 1}) //TODO albo po tylko loginie?
+
+        let dbUser = undefined
+        if (userData.login){
+            dbUser = await User.findOne({ login: userData.login }, { login: 1, email: 1, password: 1 });
+        } else if (userData.email){
+            dbUser = await User.findOne({ email: userData.email }, { login: 1, email: 1, password: 1 });
+        }
 
         if (!dbUser){
             return res.status(400).json({
                 success: false,
-                message: 'User with that email does not exist',
+                message: `${userData.login ? 'User with that login does not exist' : 'User with that email does not exist'}`,
                 errors: 'User does not exist'
             })
         }

@@ -41,6 +41,11 @@ const ProductSalesHistory = mongoose.model('ProductSalesHistory', {
                 message: props => `${props.value} has more than 2 decimal places! Price should have at most 2 decimal places`
             }
         ]
+    },
+    userId: {
+        type: ObjectId,
+        ref: 'User',
+        required: true
     }
 
 });
