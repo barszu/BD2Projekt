@@ -57,10 +57,7 @@ Zwraca koszyk klienta.
 ```js
 {
   success: true,
-  cartData: {
-    type: [CartItemSchema],
-    default: []
-  }
+  cartData: CartItemSchema[]
 }
 ```
 
@@ -118,6 +115,10 @@ Zmienia dane jednego produktu w koszyku użytkownika.
 
 Sprzedaje produkty użytkownikowi z jego koszyka.
 
+---
+
+Aby zachować synchroniczność dostępu do danych używamy mutexa weryfikacyjnego.
+
 ##### Parametry
 
 - \_id `ObjectId`
@@ -167,10 +168,7 @@ Zwraca wszystkie produkty.
 ```js
 {
   success: true,
-  cartData: {
-    type: [CartItemSchema],
-    default: []
-  }
+  cartData: CartItemSchema[]
 }
 ```
 
@@ -199,10 +197,7 @@ Zwraca wszystkie dostępne produkty.
 ```js
 {
   success: true,
-  cartData: {
-    type: [CartItemSchema],
-    default: []
-  }
+  cartData: CartItemSchema[]
 }
 ```
 
@@ -505,6 +500,235 @@ Loguje użytkownika.
   }
 }
 ```
+
+##### Zwracanie błędu
+
+```js
+{
+  success: false,
+  message: string,
+  errors: string
+}
+```
+
+## Metody pomocnicze
+
+#### addNewUser
+
+##### Opis
+
+Dodaje użytkownika do bazy.
+
+##### Parametry
+
+- userData `UserSchema`
+
+##### Wartość zwracana
+
+```js
+{
+  success: true,
+  message: 'User has been created',
+  user: {
+    _id: ObjectId,
+    customerData: {
+      firstName: string,
+      lastName: string,
+      phone: string,
+      adress: {
+        country: string,
+        postalCode: string,
+        region: string,
+        city: string,
+        street: string,
+        buildingNumber: string,
+        apartmentNumber: string
+      }
+    },
+    login: string,
+    email: string,
+    password: encodedPassword,
+    cartData: {
+      productId: number
+      quantity: number
+    }
+    orders: {
+      _id: ObjectId,
+      date: Date,
+      paymentStatus: string,
+      products: [
+        {
+          productId: number,
+          quantity: number
+        },
+        {
+          productId: number,
+          quantity: number
+        },
+      ],
+      totalPrice: number
+    }
+  }
+}
+```
+
+##### Zwracanie błędu
+
+```js
+{
+  success: false,
+  message: string,
+  errors: string
+}
+```
+
+#### getUserToken
+
+##### Opis
+
+Generuje token użytkownikowi.
+
+##### Parametry
+
+- user `UserSchema`
+
+##### Wartość zwracana
+
+`string`
+
+#### getUserByToken
+
+##### Opis
+
+Zwraca użytkownika na podstawie tokenu.
+
+##### Parametry
+
+- token `string`
+
+##### Wartość zwracana
+
+```js
+{
+  _id: ObjectId,
+  customerData: {
+    firstName: string,
+    lastName: string,
+    phone: string,
+    adress: {
+      country: string,
+      postalCode: string,
+      region: string,
+      city: string,
+      street: string,
+      buildingNumber: string,
+      apartmentNumber: string
+    }
+  },
+  login: string,
+  email: string,
+  password: encodedPassword,
+  cartData: {
+    productId: number
+    quantity: number
+  }
+  orders: {
+    _id: ObjectId,
+    date: Date,
+    paymentStatus: string,
+    products: [
+      {
+        productId: number,
+        quantity: number
+      },
+      {
+        productId: number,
+        quantity: number
+      },
+    ],
+    totalPrice: number
+  }
+}
+```
+
+#### findUser
+
+##### Opis
+
+Sprawdza czy użytkownik istnieje w bazie i czy jego token jest poprawny.
+
+##### Parametry
+
+- req `Request`
+- res `Response`
+- next `Function`
+
+##### Wartość zwracana
+
+`undefined`
+
+##### Zwracanie błędu
+
+```js
+{
+  success: false,
+  message: string,
+  errors: string
+}
+```
+
+#### verifyCart
+
+##### Opis
+
+Sprawdza czy koszyk jest poprawny.
+
+##### Parametry
+
+- cartData `CartItemSchema[]`
+
+##### Wartość zwracana
+
+```js
+{
+  fixedCart: [
+    {
+      productId: number,
+      quantity: number
+    }
+  ],
+  cartError: false
+}
+```
+
+##### Zwracanie błędu
+
+```js
+{
+  fixedCart: [
+    {
+      productId: number,
+      quantity: number
+    }
+  ],
+  cartError: true
+}
+```
+
+#### validateBodyJsonSchema
+
+##### Opis
+
+Middleware który sprawdza czy request.body posiada daną strukturę.
+
+##### Parametry
+
+- bodyFieldName `string`
+- schema `Function`
+
+##### Wartość zwracana
+
+`undefined`
 
 ##### Zwracanie błędu
 
