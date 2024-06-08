@@ -17,6 +17,96 @@ Informacje o wykorzystywanym SZBD i technologii realizacji projektu
 
 (Link do repozytorium)[https://github.com/Simsoftcik/BD2Projekt]
 
+## Opis bazy danych
+
+Baza ma implementować prosty sklep internetowy, w tym celu korzystamy z mongoDB.
+
+### Kolekcje
+
+Poniżej został pokazane przykładowe dokumenty dla każdej z kolekcji.
+
+#### Kolekcja users
+
+```js
+{
+	_id: 0,
+	customerData: {
+		firstName: "Jan",
+		lastName: "Kowalski",
+		phone: "123456789",
+		adress:{
+			country: "Poland",
+			postalCode: "12-345",
+			region: "Śląsk",
+			city: "Katowice",
+			street: "Mariacka",
+			buildingNumber: "9",
+			apartmentNumber: ""
+		}
+	},
+	login: "janekjanek",
+	email: "janekjanek@gmail.com",
+	password: hashedPassword,
+	cartData: [
+		{
+			productId: 4,
+			quantity: 8
+		},
+	]
+	orders: [{
+		_id:0,
+		date: new Date("2024-05-12"),
+		paymentStatus: "confirmed",
+		products: [
+			{
+				productId: 1,
+				quantity: 5
+			},
+			{
+				productId: 10,
+				quantity: 1
+			},
+		],
+		totalPrice: 100
+	}]
+}
+
+```
+
+#### Kolekcja products
+
+```js
+{
+	_id: 10,
+	name: "motorola moto g60",
+	quantity: 15,
+	price: 900.00,
+	productDetails: {
+		mainDescription: "Telefon jakich mało",
+		paragraphDescription: "Dobra bateria, 128GB pamięci...",
+	}
+	imageUrl: "urlDoZdjęcia",
+	available: true
+}
+```
+
+#### Kolekcja salesHistory
+
+```js
+{
+	productId: 10,
+	quantity: 5,
+	date: new Date("2024-05-12"),
+	price: 10.00
+}
+```
+
+### Charakterystyka bazy
+
+Baza danych pozwala na łatwe odczytanie historii produktu oraz historii klienta kosztem pamięci jednego dokumentu.
+
+Baza danych jest łatwa w modyfikowaniu i utrzymywaniu w przyszłości.
+
 ## Modele
 
 By zapewnić jednolitą postać danych w bazie danych, zaprojektowaliśmy modele, korzystając z biblioteki Mongoose.
