@@ -1,6 +1,6 @@
 import React from "react";
 import './ListProduct.css';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import navlogo from "../../assets/navlogo.png";
 
 const ListProduct = () => {
@@ -16,15 +16,15 @@ const ListProduct = () => {
                 'Content-Type': 'application/json',
             },
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                return data;
-            })
-            .then((data) => {
-                setAllProducts(data.products);
-                setLoading(false);
-            })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            return data;
+        })
+        .then((data) => {
+            setAllProducts(data.products);
+            setLoading(false);
+        })
     }
 
     React.useEffect(() => {
@@ -33,41 +33,48 @@ const ListProduct = () => {
 
     return (
         <div className={"list-product"}>
-            <h1>ListProduct</h1>
-            <div className={"list-product-format-main"}>
-                <p>Products</p>
-                <p>Name</p>
-                <p>Quantity</p>
-                <p>Price</p>
-                <p>Available</p>
-                <p>MainDescription</p>
-                <p>ParagraphDescription</p>
-            </div>
+            <b><h1 className="my-10 text-lg text-red-700">Lista produktów</h1></b>
             <div className={"list-product-allproducts"}>
-                <hr/>
-                {loading ? <p>Loading...</p> : allProducts.map((product, index) => {
-                    return (
-                        <>
-                            <div key={index} className={"list-product-format-main list-product-format"}>
-                                <img src={product.imageUrl} alt={product.name} className={"list-product-image"}/>
-                                <p>{product.name}</p>
-                                <p>{product.quantity}</p>
-                                <p>{product.price}</p>
-                                <p>{product.available.toString()}</p>
-                                <p>{product.productDetails.mainDescription}</p>
-                                <p>{product.productDetails.paragraphDescription}</p>
-                                <Link to={`/salesHistory/${product._id}`} style={{textDecoration: "none"}}>
-                                    <button>
-                                        <div className={"sidebar-item"}>
-                                            <h3>Historia</h3>
-                                        </div>
-                                    </button>
-                                </Link>
-                            </div>
-                            <hr/>
-                        </>
-                    )
-                })}
+                <table className="">
+                    <thead>
+                        <tr>
+                            <th className="px-5">Image</th>
+                            <th className="px-5">Name</th>
+                            <th className="px-5">Quantity</th>
+                            <th className="px-5">Price</th>
+                            <th className="px-5">Available</th>
+                            <th className="px-5">Main <br />Description</th>
+                            <th className="px-5">Paragraph <br />Description</th>
+                            <th className="px-5">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading ? <tr><td colSpan="8">Loading...</td></tr> : allProducts.map((product, index) => {
+                            return (
+                                <>
+                                    <tr key={index} className="border-b-2">
+                                        <td className="px-5"><img src={product.imageUrl} alt={product.name} className={"list-product-image"} /></td>
+                                        <td className="px-5">{product.name}</td>
+                                        <td className="px-5">{product.quantity}</td>
+                                        <td className="px-5">{product.price}</td>
+                                        <td className="px-5">{product.available.toString()}</td>
+                                        <td className="px-5">{product.productDetails.mainDescription}</td>
+                                        <td className="px-5">{product.productDetails.paragraphDescription}</td>
+                                        <td className="px-5">
+                                            <Link to={`/salesHistory/${product._id}`} style={{ textDecoration: "none" }}>
+                                                <button>
+                                                    <div className={"sidebar-item mx-10 bg-neutral-200 px-2 py-1 rounded-md"}>
+                                                        <h3>Historia</h3>
+                                                    </div>
+                                                </button>
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                </>
+                            )
+                        })}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

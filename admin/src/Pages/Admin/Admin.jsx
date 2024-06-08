@@ -8,8 +8,10 @@ import SalesHistory from "../SalesHistory/SalesHistory.jsx";
 
 const Admin = () => {
     return (
-        <div className='admin'>
-            <h1>Witaj na panalu admina</h1>
+        <div className='admin bg-neutral-100 p-20'>
+            <div className="block">
+                <h1 className="text-lg"><b>Witaj na panelu administratora</b></h1>
+            </div>
             <Routes>
                 <Route path={'/'} element={<Navigate to="/listproduct" />} />
                 <Route path={'/addproduct'} element={<AddProduct />} />
