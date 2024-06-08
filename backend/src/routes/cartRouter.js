@@ -39,7 +39,7 @@ const router = express.Router()
  */
 router.get('/own' , findUser , async (req, res) => {
     try {
-        const cartProjection = req.body.cartProjection
+        const cartProjection = req.body.cartProjection || {}
         const userData = await User.findOne({_id: req.user._id} , {_id: 1 , cartData: 1})
         let cartData = userData.cartData
 
