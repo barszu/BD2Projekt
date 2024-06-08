@@ -17,23 +17,65 @@ Informacje o wykorzystywanym SZBD i technologii realizacji projektu
 
 (Link do repozytorium)[https://github.com/Simsoftcik/BD2Projekt]
 
-## Własne typy danych (pasujące do wyrażeń regularnych)
+## Modele
 
-### string: email
+By zapewnić jednolitą postać danych w bazie danych, zaprojektowaliśmy modele, korzystając z biblioteki Mongoose.
 
-`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+### ProductSchema (kolekcja products)
 
-### string: phone
+```js
+name: `String`, required, unique
+quantity: `Number`, required
+price: `Number`, required
+productDetails: required
+	mainDescription: `String`, required, maxLength=100
+	paragraphDescription: `String`, required, maxLength=100
+imageUrl: `String`, required
+available: `Boolean`, default=true
+```
 
-`^\+(?:[0-9] ?){6,14}[0-9]$`
+### UserSchema (kolekcja users)
 
-### int: year
+```js
+customerData:
+	firstName: `String`, maxLength=50
+	lastName: `String`, maxLength=50
+	phone: `String`
+	adress:
+		country: `String`, maxLength=50
+		postalCode: `String`, maxLength=50
+		region: `String`, maxLength=50
+		city: `String`, maxLength=50
+		street: `String`, maxLength=50
+		buildingNumber: `String`, maxLength=50
+		apartmentNumber: `String`, maxLength=50
+login: `String`, required, unique
+email: `String`, required, unique
+password: `String`, required
+[cartData]: default=[]
+  productId: `ObjectId`, required
+  quantity: `Number`, required, min=1
+[orders]: default=[]
+  date: `Date`, required, default=Date.now()
+    paymentStatus: `String`, required, enum=['Paid', 'Pending', 'Failed']
+    products: required
+      productId: `ObjectId`, required
+    quantity: `Number`, required, min=1
+  totalPrice: `Number`
+```
 
-`^\d{4}$`
+### SalesHistorySchema (kolekcja salesHistory)
 
-### int: month
+```js
+productId: `ObjectId`, required
+quantity: `Number`, required, default=1
+date: `Date`, required, default=Date.now(), index
+price: `Number`, required
+```
 
-`^(0?[1-9]|1[0-2])$`
+### Walidacja
+
+Wszędzie gdzie było to potrzebne, wyposażaliśmy modele w funkcje walidujące dane. W przypadku emaila, phone, year, month sprawdzały one dodatkowo zgodność z ustalonymi wyrażeniami regularnymi
 
 ## Endpointy
 
@@ -47,6 +89,8 @@ który weryfikuje czy użytkownik istnieje i czy podany przez niego token jest p
 ##### Opis
 
 Zwraca koszyk klienta.
+
+##### Metoda HTTP `GET`
 
 ##### Parametry
 
@@ -76,6 +120,8 @@ Zwraca koszyk klienta.
 ##### Opis
 
 Zmienia dane jednego produktu w koszyku użytkownika.
+
+##### Metoda HTTP `POST`
 
 ##### Parametry
 
@@ -119,6 +165,8 @@ Sprzedaje produkty użytkownikowi z jego koszyka.
 
 Aby zachować synchroniczność dostępu do danych używamy mutexa weryfikacyjnego.
 
+##### Metoda HTTP `POST`
+
 ##### Parametry
 
 - \_id `ObjectId`
@@ -159,6 +207,8 @@ Aby zachować synchroniczność dostępu do danych używamy mutexa weryfikacyjne
 
 Zwraca wszystkie produkty.
 
+##### Metoda HTTP `GET`
+
 ##### Parametry
 
 - \_id `ObjectId`
@@ -187,6 +237,8 @@ Zwraca wszystkie produkty.
 ##### Opis
 
 Zwraca wszystkie dostępne produkty.
+
+##### Metoda HTTP `GET`
 
 ##### Parametry
 
@@ -220,6 +272,8 @@ Dodaje nowy produkt.
 ---
 
 Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy dane nowego produktu są poprawne.
+
+##### Metoda HTTP `POST`
 
 ##### Parametry
 
@@ -255,6 +309,8 @@ Dodaje nowy produkt.
 ---
 
 Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy dane nowego produktu są poprawne.
+
+##### Metoda HTTP `GET`
 
 ##### Parametry
 
@@ -303,6 +359,8 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
 ##### Opis
 
 Zwraca wszystkich użytkowników.
+
+##### Metoda HTTP `GET`
 
 ##### Parametry
 
@@ -380,6 +438,8 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
 
 Dodaje nowego użytkownika.
 
+##### Metoda HTTP `POST`
+
 ##### Parametry
 
 - user `UserSchema`
@@ -449,6 +509,8 @@ Dodaje nowego użytkownika.
 
 Rejestruje nowego użytkownika.
 
+##### Metoda HTTP `POST`
+
 ##### Parametry
 
 - user `UserSchema`
@@ -482,6 +544,8 @@ Rejestruje nowego użytkownika.
 ##### Opis
 
 Loguje użytkownika.
+
+##### Metoda HTTP `POST`
 
 ##### Parametry
 
@@ -739,3 +803,13 @@ Middleware który sprawdza czy request.body posiada daną strukturę.
   errors: string
 }
 ```
+
+## Frontend
+
+Przy pomocy biblioteki React stworzyliśmy stronę internetową, która pobiera dane z endpointów i umożliwia:
+
+- Rejestrację i logowanie się
+- Przeglądanie produktów
+- Dodawanie i usuwanie produktów z koszyka (po zalogowaniu)
+- Symboliczny zakup produktów z koszyka
+- Sprawdzanie bazy użytkowników, dodawanie oraz usuwanie produktów za pośrednictwem panelu administratora
