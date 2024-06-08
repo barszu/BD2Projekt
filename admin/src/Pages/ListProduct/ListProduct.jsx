@@ -1,5 +1,7 @@
 import React from "react";
 import './ListProduct.css';
+import {Link} from "react-router-dom";
+import navlogo from "../../assets/navlogo.png";
 
 const ListProduct = () => {
 
@@ -15,8 +17,12 @@ const ListProduct = () => {
             },
         })
             .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                return data;
+            })
             .then((data) => {
-                setAllProducts(data);
+                setAllProducts(data.products);
                 setLoading(false);
             })
     }
@@ -50,6 +56,13 @@ const ListProduct = () => {
                                 <p>{product.available.toString()}</p>
                                 <p>{product.productDetails.mainDescription}</p>
                                 <p>{product.productDetails.paragraphDescription}</p>
+                                <Link to={`/salesHistory/${product._id}`} style={{textDecoration: "none"}}>
+                                    <button>
+                                        <div className={"sidebar-item"}>
+                                            <h3>Historia</h3>
+                                        </div>
+                                    </button>
+                                </Link>
                             </div>
                             <hr/>
                         </>
