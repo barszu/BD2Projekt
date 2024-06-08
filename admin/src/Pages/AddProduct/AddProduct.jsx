@@ -8,7 +8,7 @@ const AddProduct = () => {
         name: "",
         quantity: "",
         price: "",
-        available: "",
+        available: true,
         productDetails: {
             mainDescription: "",
             paragraphDescription: "",
@@ -108,7 +108,7 @@ const AddProduct = () => {
                 <p>Product Availability</p>
                 <select value={product.available} onChange={productHandler} name={"available"}
                         className={"add-product-selector"}>
-                    <option value={true}>Yes</option>
+                    <option value={true} >Yes</option>
                     <option value={false}>No</option>
                 </select>
             </div>

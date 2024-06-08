@@ -1,8 +1,36 @@
 .navbar {
-    background-color: #1a1a1a;
+    /* background-color: #1a1a1a; */
     color: white;
     padding: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.navbar-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.navbar-item {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    padding: 5px;
+}
+
+.transition {
+    transition: all 0.1s ease;
 }

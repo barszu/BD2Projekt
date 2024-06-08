@@ -1,26 +1,24 @@
-.list-product {
+.list-users {
     display: flex;
     align-items: center;
     flex-direction: column;
-    width: 70%;
+    width: 80%;
     height: 740px;
     padding: 10px 50px 10px 50px;
-    margin: 30px;
     border-radius: 6px;
     background: white;
     left: 10%;
-    margin-left: 5%;
+    margin: 30px 30px 30px 5%;
 }
 
-.list-product-allproducts {
-    /*width: 60%;*/
-    /*left: 40%;*/
+.list-users-all {
+
     overflow-y: auto;
 }
 
-.list-product-format-main {
+.list-users-format-main {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     width: 100%;
     padding: 20px 0 20px 0;
@@ -32,14 +30,7 @@
     border-color: #2c3e50;
 }
 
-.list-product-image {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    margin: 10px;
-}
-
-.list-product-format {
+.list-users-format {
     align-items: center;
     font-weight: 500;
 }
