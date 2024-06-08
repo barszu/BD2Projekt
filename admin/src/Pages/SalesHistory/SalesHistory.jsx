@@ -61,43 +61,49 @@ const SalesHistory = () => {
 
 
     return (
-        <div className='salesHistory'>
-            <h1>SalesHistory {id}</h1>
-            <h1>ProductData</h1>
-            <div className={"list-product-format-main list-product-format"}>
-                <img src={productData.imageUrl} alt={productData.name} className={"list-product-image"}/>
-                <p>{productData.name}</p>
-                <p>{productData.quantity}</p>
-                <p>{productData.price}</p>
-                <p>{productData.available.toString()}</p>
-                <p>{productData.productDetails.mainDescription}</p>
-                <p>{productData.productDetails.paragraphDescription}</p>
-            </div>
-            <hr/>
-            <h1>SalesHistory</h1>
-            <div >
-                <div className={"list-product-format-main list-product-format"}>
-                    <p>quantity</p>
-                    <p>price</p>
-                    <p>date</p>
-                    <hr/>
-                </div>
-                {salesHistory.map((sale , idx)=>{
-                    return (
-                        <>
-                            <div key={idx} className={"list-product-format-main list-product-format"}>
-                                <p>{sale.quantity}</p>
-                                <p>{sale.price}</p>
-                                <p>{new Date(sale.date).toLocaleString()}</p>
-                            </div>
-                            <hr/>
-                        </>
+        <div className='salesHistory bg-gray-100 p-6 rounded-lg w-full max-w-screen-lg mx-auto'>
+            <h1 className='text-2xl font-bold mb-4'>SalesHistory {id}</h1>
+            <h1 className='text-xl font-semibold mb-2'>ProductData</h1>
 
+            <div className="flex items-center space-x-4 bg-white p-8 rounded-lg shadow-md">
+                <img src={productData.imageUrl} alt={productData.name} className="w-20 h-20 object-cover rounded"/>
+                <div>
+                    <p>name:</p>
+                    <p>quantity:</p>
+                    <p>price:</p>
+                    <p>available:</p>
+                    <p>mainDescription:</p>
+                    <p>paragraphDescription:</p>
+                </div>
+                <div>
+                    <p className='font-medium'>{productData.name}</p>
+                    <p>{productData.quantity}</p>
+                    <p>{productData.price}</p>
+                    <p>{productData.available.toString()}</p>
+                    <p>{productData.productDetails.mainDescription}</p>
+                    <p>{productData.productDetails.paragraphDescription}</p>
+                </div>
+            </div>
+            <hr className='my-4'/>
+            <h1 className='text-xl font-semibold mb-2'>SalesHistory</h1>
+            <div className="bg-white p-4 rounded-lg shadow-md">
+                <div className="flex justify-between border-b-2 border-gray-200 pb-2 mb-2">
+                    <p className='font-medium'>Quantity</p>
+                    <p className='font-medium'>Price</p>
+                    <p className='font-medium'>Date</p>
+                </div>
+                {salesHistory.map((sale, idx) => {
+                    return (
+                        <div key={idx} className="flex justify-between border-b-2 border-gray-200 py-2">
+                            <p>{sale.quantity}</p>
+                            <p>{sale.price}</p>
+                            <p>{new Date(sale.date).toLocaleString()}</p>
+                        </div>
                     )
                 })}
             </div>
-            <h1>Total</h1>
-            <p>{JSON.stringify(total)}</p>
+            <h1 className='text-xl font-semibold my-4'>Total</h1>
+            <p className='text-lg'>{JSON.stringify(total)}</p>
         </div>
     );
 }
