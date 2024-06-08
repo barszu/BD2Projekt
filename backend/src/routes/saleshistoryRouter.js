@@ -5,13 +5,31 @@ import {ProductSalesHistory} from "../models/salesHistorySchema.js";
 
 const router = express.Router()
 
-router.get('/' , async (req, res) => {
-    return res.json({
-        success: true,
-        message: 'Sales history endpoint'
-    })
-})
-
+/**
+ * Endpoint for getting product and its sales history
+ * @route GET /get/:id
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ *
+ * req.params.id - id of the product
+ *
+ * req.body.salesProjection - projection for sales history data
+ * req.body.salesFilter - filter for sales history data
+ * req.body.productProjection - projection for product data
+ *
+ * res.body = { //success = true
+ *     success: true,
+ *     message: 'Product and sales history found',
+ *     product: { //product data },
+ *     salesHistory: [ //array of sales history data ]
+ * }
+ *
+ * res.body = { //success = false
+ *     success: false,
+ *     message: 'Failed to query from db, db not working or bad projection',
+ *     errors: '...'
+ * }
+ */
 router.get('/get/:id', async (req, res) => {
     const salesProjection = req.body.salesProjection || {}
     const salesFilter = req.body.salesFilter || {}
@@ -47,6 +65,26 @@ router.get('/get/:id', async (req, res) => {
     }
 })
 
+/**
+ * Endpoint for getting total earnings for a product
+ * @route GET /totalEarned/:id
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ *
+ * req.params.id - id of the product
+ *
+ * res.body = { //success = true
+ *     success: true,
+ *     message: 'Total earned for product',
+ *     totalEarned: totalEarned // total earnings for the product
+ * }
+ *
+ * res.body = { //success = false
+ *     success: false,
+ *     message: 'Failed to query from db.',
+ *     errors: '...'
+ * }
+ */
 router.get('/totalEarned/:id', async (req, res) => {
     const id = req.params.id
 
