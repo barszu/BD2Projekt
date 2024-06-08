@@ -6,14 +6,9 @@ import { useProductsContext } from "../../context/productsContext.jsx";
 
 const Shop = () => {
 
-    const productsContext = useProductsContext();
-    const [products, setProducts] = useState(productsContext);
+    const {products} = useProductsContext();
 
-    useEffect(() => {
-        setProducts(productsContext);
-    }, [productsContext]);
-
-    console.log(products)
+    console.log(products);
 
     return (
         <div className="shop">

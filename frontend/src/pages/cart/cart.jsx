@@ -7,39 +7,20 @@ import "./cart.css"
 
 const Cart = () => {
 
-    const {cartItems , sellCart} = useContext(CartContext);
+    const {cartItems , sellCart, loadingCart} = useContext(CartContext);
     const navigate = useNavigate();
-
-    const [allProducts, setAllProducts] = useState([]);
-
-    const fetchProducts = async () => {
-        await fetch("http://localhost:4000/products/list")
-            .then((response) => response.json())
-            .then((data) => {
-                setAllProducts(data);
-                console.log("pobrano produkty wszystkie")
-            })
-    }
-
-    useEffect(() => {
-        fetchProducts();
-    }, []);
 
     const [totalAmount, setTotalAmount] = useState(0);
 
     useEffect(() => {
         let total = 0;
-        if (Array.isArray(cartItems)) {
-            for (let item of cartItems) {
-                const ProductData = allProducts.find((product) => product._id === item.productId);
-                if (ProductData) {
-                    total += ProductData.price * item.quantity;
-                }
-            }
+        for (let item of cartItems) {
+            total += item.quantity * item.productData.price;
         }
-        setTotalAmount(total.toFixed(2));
-    }, [allProducts, cartItems]);
+        setTotalAmount(Number(total.toFixed(2)));
+    }, [cartItems]);
 
+    if (loadingCart) return (<div>Ładowanie...</div>);
 
     return (
         <div className="cart">
@@ -50,14 +31,20 @@ const Cart = () => {
             </div>
             <div className="cartItems">
                 {
+
                     cartItems.map((item) => {
-                        const ProductData = allProducts.find((product) => product._id === item.productId);
-                        return <CartItem key={item.productId} data={
-                            {
-                                ...ProductData,
-                                quantity: item.quantity
-                            }
-                        }/>
+                        if (item.productData) {
+                            return <CartItem key={item.productId} data={
+                                {
+                                    imageUrl: item.productData.imageUrl,
+                                    name: item.productData.name,
+                                    price: item.productData.price,
+                                    quantity: item.quantity,
+                                    productId: item.productId
+                                }
+                            }/>
+                        }
+                        return null;
                     })
                 }
             </div>

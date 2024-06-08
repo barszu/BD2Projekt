@@ -6,12 +6,8 @@ import { useAuth } from '../../context/authContext.jsx';
 import {useProductsContext} from "../../context/productsContext.jsx";
 
 const ProductPage = () => {
-    const productsContext = useProductsContext();
-    const [products, setProducts] = useState(productsContext);
 
-    useEffect(() => {
-        setProducts(productsContext);
-    }, [productsContext]);
+    const {products} = useProductsContext();
 
 
     const { id } = useParams();
