@@ -89,28 +89,32 @@ const AddProduct = () => {
 
     return (
         <div className={"add-product"}>
-            <div className={"addproduct-itemfield"}>
-                <p>Product Name</p>
-                <input value={product.name} onChange={productHandler} type={"text"} name={"name"}
-                       placeholder={'input for name'}/>
+            <div>
+                <div className={"addproduct-itemfield"}>
+                    <p>Product Name</p>
+                    <input value={product.name} onChange={productHandler} type={"text"} name={"name"}
+                           placeholder={'input for name'}/>
+                </div>
+                <div className={"addproduct-itemfield"}>
+                    <p>Product Price</p>
+                    <input value={product.price} onChange={productHandler} type={"number"} name={"price"}
+                           placeholder={'input for price'}/>
+                </div>
             </div>
-            <div className={"addproduct-price"}>
-                <p>Product Price</p>
-                <input value={product.price} onChange={productHandler} type={"number"} name={"price"}
-                       placeholder={'input for price'}/>
-            </div>
-            <div className={"addproduct-price"}>
-                <p>Product Quantity</p>
-                <input value={product.quantity} onChange={productHandler} type={"number"} name={"quantity"}
-                       placeholder={'input for quantity'}/>
-            </div>
-            <div className={"add-product-item-field"}>
-                <p>Product Availability</p>
-                <select value={product.available} onChange={productHandler} name={"available"}
-                        className={"add-product-selector"}>
-                    <option value={true} >Yes</option>
-                    <option value={false}>No</option>
-                </select>
+            <div>
+                <div className={"addproduct-itemfield"}>
+                    <p>Product Quantity</p>
+                    <input value={product.quantity} onChange={productHandler} type={"number"} name={"quantity"}
+                           placeholder={'input for quantity'}/>
+                </div>
+                <div className={"add-product-item-field"}>
+                    <p>Product Availability</p>
+                    <select value={product.available} onChange={productHandler} name={"available"}
+                            className={"add-product-selector"}>
+                        <option value={true}>Yes</option>
+                        <option value={false}>No</option>
+                    </select>
+                </div>
             </div>
             <div className={"add-product-item-field"}>
                 <label htmlFor={"file-input"}>
@@ -120,16 +124,21 @@ const AddProduct = () => {
                 </label>
                 <input onChange={imageHandler} type={"file"} name={"image"} id={"file-input"} hidden/>
             </div>
-            <div className={"addproduct-itemfield"}>
-                <p>Product MainDescription</p>
-                <input value={product.productDetails.mainDescription} onChange={productDetailsHandler} type={"text"} name={"mainDescription"}
-                       placeholder={'input for main description'}/>
+            <div>
+                <div className={"addproduct-description-field"}>
+                    <p>Product MainDescription</p>
+                    <input value={product.productDetails.mainDescription} onChange={productDetailsHandler} type={"text"}
+                           name={"mainDescription"}
+                           placeholder={'input for main description'}/>
+                </div>
+                <div className={"addproduct-description-field"}>
+                    <p>Product ParagraphDescription</p>
+                    <input value={product.productDetails.paragraphDescription} onChange={productDetailsHandler}
+                           type={"text"} name={"paragraphDescription"}
+                           placeholder={'input for paragraph description'}/>
+                </div>
             </div>
-            <div className={"addproduct-itemfield"}>
-                <p>Product ParagraphDescription</p>
-                <input value={product.productDetails.paragraphDescription} onChange={productDetailsHandler} type={"text"} name={"paragraphDescription"}
-                       placeholder={'input for paragraph description'}/>
-            </div>
+
 
             <button onClick={() => {
                 addProduct().catch(error => alert("blad jakis" + error.message))

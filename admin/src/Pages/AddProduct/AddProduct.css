@@ -20,3 +20,37 @@
   object-fit: cover;
   margin: 10px;
 }
+
+.addproduct-itemfield {
+  margin: 10px;
+  height: fit-content;
+}
+
+.addproduct-itemfield input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-product-selector {
+  /*width: 100%;*/
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 10px;
+}
+
+.addproduct-description-field{
+  margin: 10px;
+  height: fit-content;
+}
+
+.addproduct-description-field input{
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+
+
+}

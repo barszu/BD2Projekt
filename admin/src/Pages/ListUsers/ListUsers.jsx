@@ -59,7 +59,7 @@ const ListUsers = () => {
                 <hr/>
                 {allUsers.map((user, index) => (
                     <>
-                        <div key={index} className={"list-users-format-main list-users-format"}>
+                        <div key={index} className={"list-users-format-main list-users-format"} >
                             <p>{user.login}</p>
                             <p>{user.email}</p>
                             <div>
