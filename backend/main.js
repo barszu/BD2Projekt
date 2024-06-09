@@ -3,6 +3,11 @@ import mongoose from 'mongoose'
 import multer from 'multer'
 import path from 'path'
 import cors from 'cors'
+import helmet from 'helmet'
+import mongoSanitize from 'express-mongo-sanitize'
+import xss from 'xss-clean'
+import hpp from 'hpp'
+
 
 
 import userRouter from "./src/routes/userRouter.js";
@@ -14,15 +19,16 @@ const port = 4000
 const dbUrl = 'mongodb+srv://kubiczek:FQNVlEF8WxeAvwKd@miniprojekt.nnkiwcg.mongodb.net'
 const dataBaseName = 'shopTest2'
 
-//TODO autenticate req from app via req.header
-
-
-
 
 const app = express()
 
 app.use(express.json()) //allows us to parse incoming json data
 app.use(cors()) //allows us to make requests from the frontend
+
+app.use(helmet()) //set security HTTP headers
+app.use(mongoSanitize()) //sanitize data against NoSQL query injection
+app.use(xss()) //sanitize data against XSS
+app.use(hpp()) //prevent HTTP param polution
 
 // db connection
 mongoose.connect(`${dbUrl}/${dataBaseName}`)
