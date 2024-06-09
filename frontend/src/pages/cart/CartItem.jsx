@@ -19,7 +19,7 @@ const CartItem = (props) => {
                 <p className="product-name">{ProductData.name}</p>
                 <p className="product-price">{ProductData.price} zł</p>
                 <div className="countHandler">
-                    <button className="countHandler-button" onClick={() => removeFromCart(ProductData._id)}>-</button>
+                    <button className="countHandler-button" onClick={() => removeFromCart(ProductData.productId)}>-</button>
 
                     {/*<input value={cartItems[id]} onChange={(event) => {setCartItemCount(Number(event.target.value) , id)}}/>*/}
 
@@ -27,7 +27,7 @@ const CartItem = (props) => {
                         value={inputValue}
                         onKeyDown={(event) => {
                             if ( event.key === 'Enter' && event.target.value.length > 0) {
-                                setCartItemCount(Number(event.target.value) , ProductData._id)
+                                setCartItemCount(Number(event.target.value) , ProductData.productId)
                             }
                         }}
                         onChange={(event) => {
@@ -38,8 +38,8 @@ const CartItem = (props) => {
                         }}
                     />
 
-                    <button className="countHandler-button" onClick={() => {addToCart(ProductData._id)}}>+</button>
-                    <button className="removal-button" onClick={() => {removeCompletelyFromCart(ProductData._id)}}>Usuń</button>
+                    <button className="countHandler-button" onClick={() => {addToCart(ProductData.productId)}}>+</button>
+                    <button className="removal-button" onClick={() => {removeCompletelyFromCart(ProductData.productId)}}>Usuń</button>
                 </div>
 
 

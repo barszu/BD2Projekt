@@ -21,6 +21,12 @@ const Product = (props) => {
         }
     }, [cartItems]);
 
+    const availableQuantity = productData.quantity - quantity;
+
+    if (availableQuantity <= 0) {
+        return null;
+    }
+
     return (
         <div className="product">
             <Link key={productData._id} to={`/products/${productData._id}`}>
@@ -28,6 +34,7 @@ const Product = (props) => {
                 <div className="product-info">
                     <p className="product-name">{productData.name}</p>
                     <p>{productData.price} zł</p>
+                    <p> Dostępne: {availableQuantity}</p>
                 </div>
             </Link>
                 {isLoggedIn &&

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useAuth} from "./authContext.jsx";
+import {useProductsContext} from "./productsContext.jsx";
 
 //global states -> global varaiables
 export const CartContext = React.createContext(null);
@@ -8,34 +9,59 @@ export const CartContext = React.createContext(null);
 export const ShopContextProvider = (props) => {
     const [cart, setCart] = useState([]);
     const { isLoggedIn, login, logout } = useAuth();
-    const fetchCart = async () => {
-        
-        if(isLoggedIn){
+    const { fetchProducts } = useProductsContext();
+
+    const [loadingCart, setLoadingCart] = useState(true);
+
+    const fetchCart =  async () => {
+        setLoadingCart(true);
+        if (isLoggedIn) {
             const token = localStorage.getItem('auth-token');
-        fetch('http://localhost:4000/cart/own', {
-            method: 'GET',
-            headers: {
-                Accept: 'application/form-data',
-                'Content-Type': 'application/json',
-                'user-auth-token': `${token}`
-            },
-        })
-            .then(response => {return response.json();})
-            .then(data => {setCart(data.cartData);})
-            .catch(err => {console.log("Something went wrong with server... Is it running???" , err);})
+            await fetch('http://localhost:4000/cart/own', {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/form-data',
+                    'Content-Type': 'application/json',
+                    'user-auth-token': `${token}`
+                },
+            })
+                .then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    setCart(data.cartData);
+                    console.log("Cart data", data.cartData);
+                    setLoadingCart(false);
+                })
+                .catch(err => {
+                    console.log("Something went wrong with server... Is it running???", err);
+                })
         }
     }
 
-    useEffect(() => {
+    useEffect( () => {
         fetchCart();
-    }, []);
+    }, [isLoggedIn]);
+
+
+    useEffect(() => {
+        console.log("Cart updated", cart);
+        console.log("loadingCart", loadingCart);
+    }, [cart]);
+
+
 
     const getTotalCartItems = () => {
-        return cart.length;
+        let total = 0;
+        cart.forEach((item) => {
+            total += item.quantity;
+        });
+        return total;
     }
 
-    const updateCart = async (cartItem) => {
+    const updateCart = (cartItem) => {
         const token = localStorage.getItem('auth-token');
+        setLoadingCart(true)
         fetch('http://localhost:4000/cart/updateone', {
             method: 'POST',
             headers: {
@@ -51,13 +77,25 @@ export const ShopContextProvider = (props) => {
             })
         })
             .then(response => {return response.json();})
-            .then(data => {setCart(data.newCart);console.log("Cart updated successfully");})
+            .then(async data => {
+                // setCart(data.newCart);
+                // console.log("Cart data from update cart", data.newCart);
+                await fetchCart();
+                setLoadingCart(false);
+
+            })
             .catch(err => {console.log("Something went wrong with server... Is it running???" , err);})
     }
 
     const addToCart = (productId) => {
         const currentItem = cart.find((item) => item.productId === productId);
         if (currentItem) {
+            console.log("Current item", currentItem);
+            const newQuantity = currentItem.quantity + 1;
+            if (newQuantity > currentItem.productData.quantity) {
+                alert("There are no more items available");
+                return;
+            }
             updateCart({productId: productId, quantity: currentItem.quantity + 1});
         } else {
             updateCart({productId: productId, quantity: 1});
@@ -107,7 +145,8 @@ export const ShopContextProvider = (props) => {
             .then(response => {return response.json();})
             .then(data => {
                 if (data.success) {
-                    setCart([]);
+                    fetchCart();
+                    fetchProducts();
                     alert("Your order has been placed successfully");
                 }
                 else if (data.message === 'Cart verification failed'){
@@ -135,7 +174,8 @@ export const ShopContextProvider = (props) => {
         setCartItemCount,
         getTotalCartItems,
         getQuantity,
-        sellCart
+        sellCart,
+        loadingCart
     }
 
     return <CartContext.Provider value={contextValue}>{props.children}</CartContext.Provider>//provider -> track of all data, organize logic

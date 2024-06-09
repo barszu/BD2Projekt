@@ -8,22 +8,7 @@ import { useAuth } from '../context/authContext.jsx';
 
 const Navbar = () => {
 
-    const { cartItems } = useContext(CartContext)
-
-    const [allQuantity, setAllQuantity] = useState(0);
-
-    useEffect(() => {
-        let sum = 0
-        if (!Array.isArray(cartItems)) {
-            return;
-        }
-        for (let item of cartItems) {
-            if (item.quantity) {
-                sum += item.quantity
-            }
-        }
-        setAllQuantity(sum);
-    }, [cartItems]);
+    const { cartItems, getTotalCartItems } = useContext(CartContext)
 
     const { isLoggedIn, login, logout } = useAuth();
 
@@ -38,7 +23,7 @@ const Navbar = () => {
                         <Link to="/cart">
                             <ShoppingCart size={32}/>
                         </Link>
-                        <p className="item-no">({allQuantity})</p>
+                        <p className="item-no">({getTotalCartItems()})</p>
                     </>
                 ) : (
                     <Link to="/login">Zaloguj się</Link>
