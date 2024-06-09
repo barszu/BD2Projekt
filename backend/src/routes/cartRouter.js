@@ -41,10 +41,8 @@ router.get('/own' , findUser , async (req, res) => {
     try {
         const cartProjection = req.body.cartProjection || {}
         const userData = await User.findOne({_id: req.user._id} , {_id: 1 , cartData: 1})
-        let cartData = userData.cartData
 
-        if (cartProjection){
-            cartData = []
+        const cartData = []
             for (let item of userData.cartData){
                 const dbProduct = await Product.findOne({_id: item.productId} , cartProjection)
                 cartData.push({
@@ -53,7 +51,6 @@ router.get('/own' , findUser , async (req, res) => {
                     productData: dbProduct
                 })
             }
-        }
 
         res.json({
             success: true,
