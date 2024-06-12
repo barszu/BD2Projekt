@@ -203,6 +203,7 @@ Zwraca koszyk klienta.
   totalPrice: number
 }
 ```
+
 ---
 
 Wartość zwracana jest zależna od projection.
@@ -679,7 +680,6 @@ Loguje użytkownika.
 }
 ```
 
-
 ### Endpointy historii sprzedaży
 
 #### /salesHistory/get/:id
@@ -722,11 +722,6 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
 }
 ```
 
-
-
-
-
-
 #### /totalEarned/:id
 
 ##### Opis
@@ -745,8 +740,6 @@ Zwraca łączną zarobioną kwotę przez konkretny produkt.
 }
 ```
 
-
-
 ##### Zwracanie błędu
 
 ```js
@@ -756,8 +749,6 @@ Zwraca łączną zarobioną kwotę przez konkretny produkt.
   errors: string
 }
 ```
-
-
 
 ## Metody pomocnicze
 
@@ -990,10 +981,53 @@ Middleware który sprawdza czy request.body posiada daną strukturę.
 
 ## Frontend
 
-Przy pomocy biblioteki React stworzyliśmy stronę internetową, która pobiera dane z endpointów i umożliwia:
+Przy pomocy biblioteki React stworzyliśmy dwie strony internetowe- jedną dla uzytkownika, która pobiera dane z endpointów i umożliwia:
 
-- Rejestrację i logowanie się
-- Przeglądanie produktów
-- Dodawanie i usuwanie produktów z koszyka (po zalogowaniu)
-- Symboliczny zakup produktów z koszyka
-- Sprawdzanie bazy użytkowników, dodawanie oraz usuwanie produktów za pośrednictwem panelu administratora
+- rejestrację i logowanie się
+- przeglądanie produktów
+- dodawanie i usuwanie produktów z koszyka (po zalogowaniu)
+- symboliczny zakup produktów z koszyka
+  Oraz drugą dla administratora, za pomocą której mozna:
+- sprawdzać bazę użytkowników
+- dodawanie oraz usuwanie produktów
+- sprawdzanie historii produktu
+
+### Sklep internetowy- zdjęcia
+
+#### Strona wyboru produktu
+
+![](./images/products.png)
+
+#### Strona wyboru produktu (po zalogowaniu)
+
+![](./images/productsLogged.png)
+
+#### Szczegółowy widok produktu
+
+![](./images/detailedProductView.png)
+
+#### Panel logowania
+
+![](./images/logging.png)
+
+#### Koszyk
+
+![](./images/cart.png)
+
+#### Koszyk (pusty)
+
+![](./images/cartEmpty.png)
+
+### Panel administratora - zdjęcia
+
+#### Panel administratora (listowanie produktów)
+
+![](./images/adminList.png)
+
+#### Dodawanie produktu
+
+![](./images/addProduct.png)
+
+#### Lista użytkowników
+
+![](./images/users.png)
