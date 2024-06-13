@@ -15,7 +15,7 @@ Informacje o wykorzystywanym SZBD i technologii realizacji projektu
 - frameworki\middleware dla backend'u: `mongoose` , `multer` , `cors`
 - frontend: `React`
 
-(Link do repozytorium)[https://github.com/Simsoftcik/BD2Projekt]
+[Link do repozytorium](https://github.com/Simsoftcik/BD2Projekt)
 
 ## Opis bazy danych
 
@@ -34,7 +34,7 @@ Poniżej został pokazane przykładowe dokumenty dla każdej z kolekcji.
 		firstName: "Jan",
 		lastName: "Kowalski",
 		phone: "123456789",
-		adress:{
+		address:{
 			country: "Poland",
 			postalCode: "12-345",
 			region: "Śląsk",
@@ -44,8 +44,8 @@ Poniżej został pokazane przykładowe dokumenty dla każdej z kolekcji.
 			apartmentNumber: ""
 		}
 	},
-	login: "janekjanek",
-	email: "janekjanek@gmail.com",
+	login: "janekJanek",
+	email: "janekJanek@gmail.com",
 	password: hashedPassword,
 	cartData: [
 		{
@@ -133,7 +133,7 @@ customerData:
 	firstName: `String`, maxLength=50
 	lastName: `String`, maxLength=50
 	phone: `String`
-	adress:
+	address:
 		country: `String`, maxLength=50
 		postalCode: `String`, maxLength=50
 		region: `String`, maxLength=50
@@ -172,7 +172,8 @@ Dokładniejszy opis można znaleźć [tutaj](./backend/models/salesHistorySchema
 
 ### Walidacja
 
-Wszędzie gdzie było to potrzebne, wyposażaliśmy modele w funkcje walidujące dane. W przypadku emaila, phone, year, month sprawdzały one dodatkowo zgodność z ustalonymi wyrażeniami regularnymi
+Wszędzie gdzie było to potrzebne, wyposażaliśmy modele w funkcje walidujące dane.
+W przypadku email, phone, year, month sprawdzały one dodatkowo zgodność z ustalonymi wyrażeniami regularnymi
 
 ## Endpointy
 
@@ -206,8 +207,8 @@ Zwraca koszyk klienta.
 
 ---
 
-Wartość zwracana jest zależna od projection.
-Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
+Parametry zwracane w cartData są zależna od projection.
+Pełny typ `CartItemSchema` jest zwracany gdy projection nie zostanie podane.
 
 ##### Zwracanie błędu
 
@@ -217,6 +218,44 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+router.get("/own", findUser, async (req, res) => {
+  try {
+    const cartProjection = req.body.cartProjection || {};
+    const userData = await User.findOne(
+      { _id: req.user._id },
+      { _id: 1, cartData: 1 }
+    );
+
+    const cartData = [];
+    for (let item of userData.cartData) {
+      const dbProduct = await Product.findOne(
+        { _id: item.productId },
+        cartProjection
+      );
+      cartData.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        productData: dbProduct,
+      });
+    }
+
+    res.json({
+      success: true,
+      cartData: cartData,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user data from db",
+      errors: err,
+    });
+  }
+});
 ```
 
 #### /cart/updateone
@@ -257,6 +296,101 @@ Zmienia dane jednego produktu w koszyku użytkownika.
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+router.post("/updateone", findUser, async (req, res) => {
+  const cartProductData = req.body.cartProductData;
+  const userData = req.user;
+  if (!cartProductData) {
+    return res.status(400).json({
+      success: false,
+      message: "No cartProductData provided",
+      errors: "No cartProductData provided via body",
+    });
+  }
+  if (
+    !cartProductData.hasOwnProperty("productId") ||
+    !cartProductData.hasOwnProperty("quantity")
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Mising parameter in cartProductData",
+      errors:
+        "Parameter 'productId' or 'quantity' not found in cartProductData (body object)",
+    });
+  }
+  if (cartProductData.quantity < 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Bad quantity value",
+      errors: "Quantity of product in cart is less than 0",
+    });
+  }
+
+  try {
+    const dbUser = await User.findOne({ _id: userData._id }, { cartData: 1 });
+    const oldCart = JSON.parse(JSON.stringify(dbUser.cartData)); // 200 iq deep copy
+
+    if (cartProductData.quantity === 0) {
+      // Jeśli produkt ma być usunięty z koszyka
+
+      dbUser.cartData = dbUser.cartData.filter(
+        (item) => item.productId.toString() !== cartProductData.productId
+      );
+    } else {
+      //normalna modyfikacja koszyka
+
+      // znajdz produkt w koszyku
+      let cartItem = dbUser.cartData.find(
+        (item) => item.productId.toString() === cartProductData.productId
+      );
+
+      if (cartItem) {
+        // Jeśli produkt jest już w koszyku, zaktualizuj ilość
+        cartItem.quantity = cartProductData.quantity;
+      } else {
+        // Jeśli produktu nie ma w koszyku, dodaj go
+        cartItem = {
+          productId: cartProductData.productId,
+          quantity: cartProductData.quantity,
+        };
+        dbUser.cartData.push(cartItem);
+      }
+
+      // sprawdzenie czy produkt mozna kupic w takiej ilosci, i czy jest dostepny
+      const dbProduct = await Product.findOne(
+        { _id: cartProductData.productId },
+        { quantity: 1, available: 1 }
+      );
+
+      if (!(cartItem.quantity <= dbProduct.quantity) || !dbProduct.available) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Bad quantity value. Quantity of product in cart is bigger than available in DB. Or product is not available",
+          errors: `dbProduct.quantity ${dbProduct.quantity} < ${cartItem.quantity} , dbProduct.available ${dbProduct.available}`,
+        });
+      }
+    }
+    // finally
+    dbUser.save();
+    return res.json({
+      success: true,
+      message: "Cart updated",
+      newCart: dbUser.cartData,
+      oldCart: oldCart,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server error probably DB error or bad quantity value",
+      errors: err,
+    });
+  }
+});
 ```
 
 #### /cart/sell
@@ -303,6 +437,94 @@ Aby zachować synchroniczność dostępu do danych używamy mutexa weryfikacyjne
 }
 ```
 
+##### Implementacja
+
+```js
+router.post("/sell", findUser, async (req, res) => {
+  const reqUserData = req.user;
+  const release = await verificationMutex.acquire(); //przyblokowanie innych instancji
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const dbUser = await User.findOne({ _id: reqUserData._id });
+    {
+      // verification of cart block
+      const { fixedCart, cartError } = await verifyCart(dbUser.cartData);
+
+      if (cartError === true) {
+        const oldCart = JSON.parse(JSON.stringify(dbUser.cartData)); // 200 iq deep copy
+        dbUser.cartData = fixedCart;
+        await dbUser.save({ session });
+
+        release();
+        return res.status(400).json({
+          success: false,
+          message: "Cart verification failed, cart has been fixed",
+          errors: "Cart verification failed",
+          cartFixed: true,
+          newCart: dbUser.cartData,
+          oldCart: oldCart,
+        });
+      }
+    }
+
+    // cart verification passed, selling... //TODO add dummy payment ?
+    let totalPrice = 0;
+
+    async function updateDbItems() {
+      for (let item of dbUser.cartData) {
+        const dbProduct = await Product.findOne({ _id: item.productId });
+        dbProduct.quantity -= item.quantity;
+        totalPrice += item.quantity * dbProduct.price;
+        dbProduct.save({ session });
+
+        // create product history
+        new ProductSalesHistory({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: dbProduct.price,
+          userId: dbUser._id,
+        }).save({ session });
+      }
+    }
+
+    await updateDbItems();
+
+    totalPrice = Number(totalPrice.toFixed(2));
+
+    dbUser.orders.push({
+      paymentStatus: "Paid",
+      products: dbUser.cartData,
+      totalPrice: totalPrice,
+    });
+
+    dbUser.cartData = [];
+    await dbUser.save({ session });
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    res.json({
+      success: true,
+      message: "Products sold",
+      totalPrice: totalPrice,
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    await session.endSession();
+    res.status(500).json({
+      success: false,
+      message: "Server error probably DB error",
+      errors: err,
+    });
+  } finally {
+    release(); // mutex release
+  }
+});
+```
+
 ### Endpointy produktu
 
 #### /products/list
@@ -336,6 +558,29 @@ Zwraca wszystkie produkty.
 }
 ```
 
+##### Implementacja
+
+```js
+router.get("/list", async (req, res) => {
+  const projection = req.body.projection || {};
+  const filter = req.body.filter || {};
+  try {
+    const products = await Product.find(filter, projection);
+
+    return res.json({
+      success: true,
+      products: products,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to query from db:" + err.message,
+      errors: err,
+    });
+  }
+});
+```
+
 #### /products/available
 
 ##### Opis
@@ -365,6 +610,30 @@ Zwraca wszystkie dostępne produkty.
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+router.get("/available", async (req, res) => {
+  const projection = req.body.projection || {};
+  try {
+    const products = await Product.find(
+      { available: true, quantity: { $gt: 0 } },
+      projection
+    );
+    return res.json({
+      success: true,
+      products: products,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to query from db:" + err.message,
+      errors: err,
+    });
+  }
+});
 ```
 
 #### /products/add
@@ -402,6 +671,42 @@ Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy da
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+router.post(
+  "/add",
+  validateBodyJsonSchema("newProduct", Product),
+  async (req, res) => {
+    const reqProduct = req.body.newProduct;
+    try {
+      const isAlreadyInDB = await Product.findOne({ name: reqProduct.name });
+      if (isAlreadyInDB) {
+        return res.status(409).json({
+          success: false,
+          message: "Product already in DB with that name",
+          errors: `When trying to add ${reqProduct} found already ${isAlreadyInDB} in DB`,
+        });
+      }
+
+      const product = new Product(reqProduct);
+      await product.save();
+      return res.json({
+        success: true,
+        message: "Product saved",
+        name: req.body.name,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to save to db",
+        errors: err,
+      });
+    }
+  }
+);
 ```
 
 #### /products/get/:id
@@ -457,6 +762,38 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
 }
 ```
 
+##### Implementacja
+
+```js
+router.get("/get/:id", async (req, res) => {
+  const projection = req.body.projection || {};
+  const id = req.params.id;
+  try {
+    const product = await Product.findOne({ _id: id }, projection);
+
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: "Product not found in DB",
+        errors: "Product with that _id not found in DB",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Product found",
+      product: product,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to query from db, db not working or bad projection",
+      errors: err,
+    });
+  }
+});
+```
+
 ### Endpointy użytkownika
 
 #### /users/list
@@ -484,7 +821,7 @@ Zwraca wszystkich użytkowników.
         firstName: string,
         lastName: string,
         phone: string,
-        adress: {
+        address: {
           country: string,
           postalCode: string,
           region: string,
@@ -537,6 +874,26 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
 }
 ```
 
+##### Implementacja
+
+```js
+router.get("/list", async (req, res) => {
+  const projection = req.body.projection || {};
+  const filter = req.body.filter || {};
+
+  try {
+    const fetchedUsers = await User.find(filter, projection);
+    res.json(fetchedUsers);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to query from db:" + err.message,
+      errors: err,
+    });
+  }
+});
+```
+
 #### /users/add
 
 ##### Opis
@@ -561,7 +918,7 @@ Dodaje nowego użytkownika.
       firstName: string,
       lastName: string,
       phone: string,
-      adress: {
+      address: {
         country: string,
         postalCode: string,
         region: string,
@@ -608,6 +965,28 @@ Dodaje nowego użytkownika.
 }
 ```
 
+##### Implementacja
+
+```js
+router.post("/add", async (req, res) => {
+  try {
+    const userData = req.body.user; //as in schema
+    const result = await addNewUser(userData);
+    if (result.success === true) {
+      return res.json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add user" + err.message,
+      errors: err,
+    });
+  }
+});
+```
+
 #### /users/signup
 
 ##### Opis
@@ -644,6 +1023,38 @@ Rejestruje nowego użytkownika.
 }
 ```
 
+##### Implementacja
+
+```js
+router.post("/signup", async (req, res) => {
+  try {
+    const userData = req.body.user; //as in schema
+    const addUserResult = await addNewUser(userData);
+    if (addUserResult.success === false) {
+      return res.status(400).json(addUserResult);
+    }
+    const user = addUserResult.user;
+
+    const token = getUserToken(user);
+    return res.json({
+      success: true,
+      token: token,
+      user: {
+        _id: user._id,
+        login: user.login,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to sign up user" + err.message,
+      errors: err,
+    });
+  }
+});
+```
+
 #### /users/login
 
 ##### Opis
@@ -678,6 +1089,72 @@ Loguje użytkownika.
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+router.post("/login", async (req, res) => {
+  try {
+    const userData = req.body.user; //as in schema
+
+    let dbUser = undefined;
+    if (userData.login) {
+      dbUser = await User.findOne(
+        { login: userData.login },
+        { login: 1, email: 1, password: 1 }
+      );
+    } else if (userData.email) {
+      dbUser = await User.findOne(
+        { email: userData.email },
+        { login: 1, email: 1, password: 1 }
+      );
+    }
+
+    if (!dbUser) {
+      return res.status(400).json({
+        success: false,
+        message: `${
+          userData.login
+            ? "User with that login does not exist"
+            : "User with that email does not exist"
+        }`,
+        errors: "User does not exist",
+      });
+    }
+
+    // const passwordCompare = dbUser.password === userData.password
+    const passwordCompare = await bcrypt.compare(
+      userData.password,
+      dbUser.password
+    );
+
+    if (passwordCompare) {
+      const token = getUserToken(dbUser);
+      res.json({
+        success: true,
+        token: token,
+        user: {
+          _id: dbUser._id,
+          login: dbUser.login,
+          email: dbUser.email,
+        },
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Invalid password",
+        errors: "Invalid password",
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to log in user" + err.message,
+      errors: err,
+    });
+  }
+});
 ```
 
 ### Endpointy historii sprzedaży
@@ -722,6 +1199,47 @@ Powyżej znajdują się dane otrzymane gdy projection nie zostanie podane.
 }
 ```
 
+##### Implementacja
+
+```js
+router.get("/get/:id", async (req, res) => {
+  const salesProjection = req.body.salesProjection || {};
+  const salesFilter = req.body.salesFilter || {};
+  const productProjection = req.body.productProjection || {};
+
+  const id = req.params.id;
+
+  try {
+    const dbProduct = await Product.findOne({ _id: id }, productProjection);
+
+    if (!dbProduct) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in DB",
+        errors: "Product with that _id not found in DB",
+      });
+    }
+
+    const dbSalesHistory = await ProductSalesHistory.find(
+      { productId: id, ...salesFilter },
+      salesProjection
+    );
+    return res.json({
+      success: true,
+      message: "Product and sales history found",
+      product: dbProduct,
+      salesHistory: dbSalesHistory,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to query from db, db not working or bad projection",
+      errors: err,
+    });
+  }
+});
+```
+
 #### /totalEarned/:id
 
 ##### Opis
@@ -750,6 +1268,35 @@ Zwraca łączną zarobioną kwotę przez konkretny produkt.
 }
 ```
 
+##### Implementacja
+
+```js
+router.get("/totalEarned/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const dbSalesHistory = await ProductSalesHistory.find({ productId: id });
+    let totalEarned = 0;
+    dbSalesHistory.forEach((sale) => {
+      totalEarned += sale.price * sale.quantity;
+    });
+
+    totalEarned = Number(totalEarned.toFixed(2));
+    return res.json({
+      success: true,
+      message: "Total earned for product",
+      totalEarned: totalEarned,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to query from db.",
+      errors: err,
+    });
+  }
+});
+```
+
 ## Metody pomocnicze
 
 #### addNewUser
@@ -774,7 +1321,7 @@ Dodaje użytkownika do bazy.
       firstName: string,
       lastName: string,
       phone: string,
-      adress: {
+      address: {
         country: string,
         postalCode: string,
         region: string,
@@ -821,6 +1368,53 @@ Dodaje użytkownika do bazy.
 }
 ```
 
+##### Implementacja
+
+```js
+async function addNewUser(userData) {
+  let isUserExist;
+  try {
+    isUserExist = await User.findOne({ email: userData.email }, { login: 1 });
+  } catch (err) {
+    return {
+      success: false,
+      message: "Failed to query from db to check if user exist" + err.message,
+      errors: err,
+    };
+  }
+
+  if (isUserExist) {
+    return {
+      success: false,
+      message: "User with that email already exists",
+      errors: "User already exists",
+    };
+  }
+  try {
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    // Replace the plain text password with the hashed password
+    userData.password = await bcrypt.hash(userData.password, salt);
+
+    const user = new User(userData);
+    const savedUser = await user.save();
+    return {
+      success: true,
+      message: "User has been created",
+      user: savedUser,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        "Failed to create or add user, bad data provided probably " +
+        err.message,
+      errors: err,
+    };
+  }
+}
+```
+
 #### getUserToken
 
 ##### Opis
@@ -834,6 +1428,18 @@ Generuje token użytkownikowi.
 ##### Wartość zwracana
 
 `string`
+
+##### Implementacja
+
+```js
+function getUserToken(user) {
+  const jwt_data = {
+    //data for jwt (json web token)
+    user: { _id: user._id },
+  };
+  return jwt.sign(jwt_data, userEncodePass);
+}
+```
 
 #### getUserByToken
 
@@ -854,7 +1460,7 @@ Zwraca użytkownika na podstawie tokenu.
     firstName: string,
     lastName: string,
     phone: string,
-    adress: {
+    address: {
       country: string,
       postalCode: string,
       region: string,
@@ -890,6 +1496,15 @@ Zwraca użytkownika na podstawie tokenu.
 }
 ```
 
+##### Implementacja
+
+```js
+function getUserByToken(token) {
+  const decoded = jwt.verify(token, userEncodePass);
+  return decoded.user;
+}
+```
+
 #### findUser
 
 ##### Opis
@@ -914,6 +1529,57 @@ Sprawdza czy użytkownik istnieje w bazie i czy jego token jest poprawny.
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+export const findUser = async (req, res, next) => {
+  const reqUser = req.body.user;
+  if (reqUser && reqUser._id) {
+    // by passing user auth
+    if (!User.exists({ _id: reqUser._id })) {
+      return res.status(404).json({
+        success: false,
+        message: "That user does not exist in db",
+        errors: `User with provided _id: ${reqUser._id} does not exist in db`,
+      });
+    } else {
+      return next();
+    }
+  }
+
+  const token = req.header("user-auth-token");
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      errors: "No token found, authorization denied",
+      message: "Authenticate using a valid token",
+    });
+  }
+
+  try {
+    const user = getUserByToken(token);
+
+    if (!User.exists({ _id: user._id })) {
+      res.status(404).json({
+        success: false,
+        message: "That user does not exist in db",
+        errors: `User with provided _id: ${user._id} does not exist in db`,
+      });
+    }
+
+    // req.user = getUserByToken(token)
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      errors: err,
+      message: "Provided token is not valid",
+    });
+  }
+};
 ```
 
 #### verifyCart
@@ -954,6 +1620,38 @@ Sprawdza czy koszyk jest poprawny.
 }
 ```
 
+##### Implementacja
+
+```js
+async function verifyCart(cartData) {
+  const fixedCart = [];
+  let cartError = false;
+
+  for (let item of cartData) {
+    const dbProduct = await Product.findOne({ _id: item.productId });
+    if (dbProduct.available === false) {
+      // remove from cart
+      cartError = true;
+      continue;
+    }
+
+    if (dbProduct.quantity < item.quantity) {
+      // fix quantity
+      cartError = true;
+      item.quantity = dbProduct.quantity;
+      fixedCart.push(item);
+    } else {
+      // normal
+      fixedCart.push(item);
+    }
+  }
+  return {
+    fixedCart: fixedCart,
+    cartError: cartError,
+  };
+}
+```
+
 #### validateBodyJsonSchema
 
 ##### Opis
@@ -977,6 +1675,33 @@ Middleware który sprawdza czy request.body posiada daną strukturę.
   message: string,
   errors: string
 }
+```
+
+##### Implementacja
+
+```js
+const validateBodyJsonSchema = (bodyFieldName, schema) => {
+  return (req, res, next) => {
+    if (!req.body.hasOwnProperty(bodyFieldName)) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required field in JSON body",
+        errors: `Missing required field: ${bodyFieldName}`,
+      });
+    }
+
+    try {
+      const isValid = new schema(req.body[bodyFieldName]);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid given JSON structure",
+        errors: error,
+      });
+    }
+    next();
+  };
+};
 ```
 
 ## Frontend

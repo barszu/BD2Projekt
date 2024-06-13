@@ -122,8 +122,6 @@ router.post('/add', validateBodyJsonSchema("newProduct" , Product ) ,async (req,
             errors: err
         })
     }
-
-
 })
 
 /**
@@ -176,8 +174,6 @@ router.get('/get/:id', async (req, res) => {
             errors: err
         })
     }
-
-
 })
 
 export default router
