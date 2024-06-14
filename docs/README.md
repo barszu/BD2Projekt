@@ -734,7 +734,10 @@ który weryfikuje czy użytkownik istnieje i czy podany przez niego token jest p
 
 ##### Opis
 
-Zwraca koszyk klienta.
+- Zwraca dane koszyku klienta
+- w request przekazuje id uzytkownika
+- W przypadku błędu dostępu do bazy danych zwraca błąd ze statusem 500
+- przyjmuje parametr cartProjection specyfikujący, które pola zawrzeć w odpowiedzi
 
 ##### Metoda HTTP `GET`
 
@@ -810,7 +813,11 @@ router.get("/own", findUser, async (req, res) => {
 
 ##### Opis
 
-Zmienia dane jednego produktu w koszyku użytkownika.
+- Zmienia dane jednego produktu w koszyku użytkownika
+- W request przekazywany jest id użytkownika oraz body zawierające obiekt cartProductData, który powinien mieć id produktu oraz ilość
+- Jeśli zostanie przekazana zerowa ilość, produkt zostanie usunięty z koszyka.
+- W przeciwnym przypadku produkt zostanie dodany
+- Podczas błędu dostępu do bazy danych zwróci błąd o statusie 500
 
 ##### Metoda HTTP `POST`
 
@@ -945,11 +952,14 @@ router.post("/updateone", findUser, async (req, res) => {
 
 ##### Opis
 
-Sprzedaje produkty użytkownikowi z jego koszyka.
+- Sprzedaje produkty użytkownikowi z jego koszyka.
+- Aby zachować synchroniczność dostępu do danych używamy mutexa.
+- W request przekazywane jest id użytkownika
+- Jeśli produkt jest niedostępny w zadanej ilości, zostanie ona zminimalizowana do największej możliwej i zwróci błąd ze statusem 400
+- W przypadku błędu aktualizacji bazy danych zwróci błąd ze statusem 500
+- W przypadku pomyślej weryfikacji produkty zostaną sprzedane, ich ilości w bazie danych zaktualizowane, dodane zostaną dane do historii sprzedaży oraz koszyk zostanie wyczyszczony
 
 ---
-
-Aby zachować synchroniczność dostępu do danych używamy mutexa.
 
 ##### Metoda HTTP `POST`
 
@@ -1079,7 +1089,9 @@ router.post("/sell", findUser, async (req, res) => {
 
 ##### Opis
 
-Zwraca wszystkie produkty.
+- Zwraca wszystkie produkty
+- Za pomocą opcjonalnego projection w body requesta mozemy kontrolować, które właściwości produktów chcemy otrzymać.
+- W przypadku błędu dostępu do bazy danych zwróci błąd ze statusem 500
 
 ##### Metoda HTTP `GET`
 
@@ -1133,7 +1145,10 @@ router.get("/list", async (req, res) => {
 
 ##### Opis
 
-Zwraca wszystkie dostępne produkty.
+- Zwraca wszystkie dostępne produkty
+- Za pomocą opcjonalnego projection w body requesta mozemy kontrolować, które właściwości produktów chcemy otrzymać.
+- Zwróci tylko produkty, które mają available=true oraz quantity>0
+- W przypadku błędu dostępu do bazy danych zwróci błąd ze statusem 500
 
 ##### Metoda HTTP `GET`
 
@@ -1188,11 +1203,12 @@ router.get("/available", async (req, res) => {
 
 ##### Opis
 
-Dodaje nowy produkt.
-
+- Dodaje nowy produkt
+- Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy dane nowego produktu są poprawne
+- Jeśli produkt o podanej nazwie już istnieje, zostanie zwrócony błąd o statusie 409
+- Jeżeli wystąpi błąd podczas zapisu produktu do bazy danych, zwrócony zostanie błąd o statusie 500
 ---
 
-Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy dane nowego produktu są poprawne.
 
 ##### Metoda HTTP `POST`
 
@@ -1261,11 +1277,16 @@ router.post(
 
 ##### Opis
 
-Dodaje nowy produkt.
+- Endpoint służy do otrzymywania produktu o konkretnym id
+- Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy dane nowego produktu są poprawne
+- Request powinien zawierać id produktu, który chcemy otrzymać
+- Za pomocą opcjonalnego projection w body requesta mozemy kontrolować, które właściwości produktów chcemy otrzymać.
+- Jeśli produkt istnieje, zostanie zwrócony w response, w przeciwnym przypadku zwrócony zostanie błąd o statusie 404
+- W przypadku problemów z dokonaniem kwerendy do bazy danych zwrócony zostanie error ze statusem 500
 
 ---
 
-Przed wykonaniem sprawdzamy przy pomocy middlewaru validateBodyJsonSchema czy dane nowego produktu są poprawne.
+
 
 ##### Metoda HTTP `GET`
 
@@ -1348,7 +1369,9 @@ router.get("/get/:id", async (req, res) => {
 
 ##### Opis
 
-Zwraca wszystkich użytkowników.
+- Zwraca wszystkich użytkowników
+- Za pomocą opcjonalnego projection w body requesta mozemy kontrolować, które właściwości produktów chcemy otrzymać
+- Zwraca błąd ze statusem 500, gdy nie powiedzie się dostęp do bazy danych
 
 ##### Metoda HTTP `GET`
 
@@ -1446,7 +1469,9 @@ router.get("/list", async (req, res) => {
 
 ##### Opis
 
-Dodaje nowego użytkownika.
+- Dodaje nowego użytkownika
+- W body requesta przyjmuje pełne dane użytkownika
+- Zwraca błąd ze statusem 500, gdy nie powiedzie się dostęp do bazy danych
 
 ##### Metoda HTTP `POST`
 
@@ -1539,7 +1564,11 @@ router.post("/add", async (req, res) => {
 
 ##### Opis
 
-Rejestruje nowego użytkownika.
+- Rejestruje nowego użytkownika
+- W body request przyjmuje pełne dane o użytkowniku
+- Zwraca token i krótki obiekt opisujący usera w przypadku powodzenia
+- Zwraca błąd ze statusem 500, gdy nie powiedzie się dostęp do bazy danych
+
 
 ##### Metoda HTTP `POST`
 
@@ -1607,7 +1636,11 @@ router.post("/signup", async (req, res) => {
 
 ##### Opis
 
-Loguje użytkownika.
+- Loguje użytkownika
+- W body requesta przyjmuje pełne dane o użytkowniku
+- Jeśli przekazany jest login, zostanie dokonana próba zalogowania po nim, w przeciwnym przypadku będzie brany pod uwagę email. W przypadku braku ich obu zwróci błąd
+- Zwraca token i krótki obiekt opisujący usera w przypadku powodzenia
+- Zwraca błąd ze statusem 500, gdy nie powiedzie się dostęp do bazy danych
 
 ##### Metoda HTTP `POST`
 
@@ -1711,7 +1744,9 @@ router.post("/login", async (req, res) => {
 
 ##### Opis
 
-Zwraca historię sprzedaży konkretnego produktu.
+- Zwraca historię sprzedaży konkretnego produktu
+- Przyjmuje w request id jako parametr id produktu
+- Za pomocą opcjonalnego projection w body requesta mozemy kontrolować, które właściwości produktów chcemy otrzymać (zarówno danych produktu, jak i historii sprzedaży)
 
 ##### Metoda HTTP `GET`
 
@@ -1792,7 +1827,9 @@ router.get("/get/:id", async (req, res) => {
 
 ##### Opis
 
-Zwraca łączną zarobioną kwotę przez konkretny produkt.
+- Zwraca łączną zarobioną kwotę przez konkretny produkt
+- W request.body przyjmuje id produktu
+- Zwraca wiadomość o powodzeniu operacji, oraz w przypadku prawidłowego przebiegu całkowitą zarobioną kwotę
 
 ##### Metoda HTTP `GET`
 
