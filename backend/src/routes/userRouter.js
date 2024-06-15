@@ -113,7 +113,6 @@ async function addNewUser(userData){
             errors: err
         }
     }
-
 }
 
 /**
@@ -143,7 +142,6 @@ router.post('/add', async (req, res) => {
             errors: err
         })
     }
-
 })
 
 /**
@@ -215,7 +213,6 @@ router.post('/signup', async (req, res) => {
             errors: err
         })
     }
-
 })
 
 /**
@@ -292,8 +289,6 @@ router.post('/login', async (req, res) => {
             errors: err
         })
     }
-
-
 })
 
 
@@ -332,7 +327,6 @@ export const findUser = async (req, res, next) => {
         else {
             return next()
         }
-
     }
 
 
@@ -367,9 +361,6 @@ export const findUser = async (req, res, next) => {
             message: 'Provided token is not valid'
         })
     }
-
-
-
 }
 
 

@@ -22,6 +22,7 @@ const router = express.Router()
  *     "price":1,
  *     "productDetails":1,
  * }
+ * If an error occurs while querying the database, a 500 status code is returned along with the error message.
  */
 router.get('/list', async (req, res) => {
     const projection = req.body.projection || {}
@@ -122,8 +123,6 @@ router.post('/add', validateBodyJsonSchema("newProduct" , Product ) ,async (req,
             errors: err
         })
     }
-
-
 })
 
 /**
@@ -176,8 +175,6 @@ router.get('/get/:id', async (req, res) => {
             errors: err
         })
     }
-
-
 })
 
 export default router

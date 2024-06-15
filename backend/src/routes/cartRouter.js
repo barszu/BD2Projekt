@@ -160,7 +160,6 @@ router.post('/updateone' , findUser , async (req, res) => {
             errors: err
         });
     }
-
 })
 
 
@@ -202,7 +201,6 @@ async function verifyCart(cartData) {
         fixedCart: fixedCart,
         cartError: cartError
     }
-
 }
 
 
