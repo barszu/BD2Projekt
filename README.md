@@ -1,11 +1,10 @@
 # 🛒 Online Store - MERN Project 🛒
 
 ## Group members 👨‍💻 👨‍💻 👨‍💻
-(names and surnames, email addresses):
 
-- **Bartłomiej Szubiak** bszubiak@student.agh.edu.pl
-- **Szymon Kubiczek** kubiczek@student.agh.edu.pl
-- **Konrad Armaty**s karmatys@student.agh.edu.pl
+- **Bartłomiej Szubiak** 
+- **Szymon Kubiczek** 
+- **Konrad Armaty**s 
 
 ## Project topic 📋
 
